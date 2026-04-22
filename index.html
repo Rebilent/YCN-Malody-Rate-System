@@ -37,6 +37,18 @@
 </div>
 
 <script>
+     // --- ここに曲を追加していけます ---
+    const songData = [
+        { name: "Shining (feat. 藍月なくる)", constant: 22.0 },
+        { name: "World's end BLACKBOX", constant: 47.0 },
+        { name: "ソテリア", constant: 19.0 },
+        { name: "LΛ8YRИTH", constant: 42.0 },
+        { name: "AMA", constant: 40.0}
+        // ... 好きなだけ追加可能
+    ];
+
+    // 保存されているAccデータを読み込む
+    let savedAccs = JSON.parse(localStorage.getItem('malody_acc_data')) || {};
     // 保存されているデータを読み込む
 let savedAccs = JSON.parse(localStorage.getItem('malody_acc_data')) || {};
 let currentSortKey = 'rate'; // 初期はレート順
