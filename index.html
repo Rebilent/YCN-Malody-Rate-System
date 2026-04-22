@@ -6,67 +6,63 @@
     <title>Malody Best 30 Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* --- レートの文字色アニメーション設定 --- */
-        /* 透明化の設定を各クラスの中に閉じ込めることで、通常の文字が消えるのを防ぎます */
+        /* --- レートの文字色設定（最優先） --- */
+        .rating-display { 
+            text-align: center; 
+            font-size: 40px; 
+            font-weight: bold; 
+            margin: 20px 0; 
+            padding: 15px; 
+            background: #e8f4fd; 
+            border-radius: 8px; 
+            min-height: 60px;
+            color: #333; /* デフォルトの色を必ず指定 */
+        }
+
+        /* 虹色設定：効かない環境でも文字が消えないように背景色を指定 */
         .rate-rainbow {
             background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
-            -webkit-background-clip: text;
-            background-clip: text;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: rgba(0,0,0,0.2); /* 念のため少し色を残す */
             -webkit-text-fill-color: transparent;
             background-size: 200% auto;
             animation: rainbow-move 3s linear infinite;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.2));
-        }
-
-        @keyframes rainbow-move {
-            to { background-position: 200% center; }
         }
 
         .rate-gold {
-            background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: bold;
+            color: #b38728 !important; /* 透明化を使わず、直接金色の色コードを指定 */
+            -webkit-text-fill-color: initial !important;
         }
 
         .rate-silver {
-            background: linear-gradient(45deg, #959595, #ffffff, #707070);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #707070 !important;
+            -webkit-text-fill-color: initial !important;
         }
 
-        /* 14未満のときは通常の青色で、透明化を無効にする */
         .rate-normal { 
             color: #3498db !important; 
             -webkit-text-fill-color: initial !important; 
         }
 
+        @keyframes rainbow-move { to { background-position: 200% center; } }
+
         /* --- 基本デザイン --- */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
         .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #2c3e50; }
-        
         .nav-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .nav-btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; background: #bdc3c7; color: white; font-weight: bold; transition: 0.3s; }
         .nav-btn.active { background: #3498db; }
-        
         .screen { display: none; }
         .screen.active { display: block; }
-
-        .rating-display { text-align: center; font-size: 40px; font-weight: bold; margin: 20px 0; padding: 15px; background: #e8f4fd; border-radius: 8px; min-height: 60px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: #3498db; color: white; padding: 12px; position: sticky; top: 0; z-index: 10; }
         td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
         input[type="number"] { width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        
         .jacket-img { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; vertical-align: middle; margin-right: 10px; background: #eee; }
         .info-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; }
-        
         .save-btn { background: #27ae60; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; font-size: 16px; }
-        .save-btn:hover { background: #219150; }
-
         #capture-area { background: white; padding: 20px; border-radius: 12px; }
     </style>
 </head>
@@ -81,9 +77,6 @@
     </div>
 
     <div id="input-screen" class="screen active">
-        <div class="info-card">
-            <p>各曲のAccを入力してください。GitHubに画像を上げればジャケットも表示されます。</p>
-        </div>
         <table>
             <thead>
                 <tr>
@@ -98,7 +91,6 @@
 
     <div id="result-screen" class="screen">
         <button class="save-btn" onclick="saveAsImage()">📸 結果を画像として保存</button>
-        
         <div id="capture-area">
             <div class="rating-display" id="total-rating">Total Rate: 0.00</div>
             <table>
@@ -117,7 +109,6 @@
 </div>
 
 <script>
-    // --- 曲データ ---
     const songData = [
         { name: "Shining (feat. 藍月なくる)", constant: 22.0, image: "images/shining.jpg" },
         { name: "World's end BLACKBOX", constant: 47.0, image: "images/blackbox.png" },
@@ -143,7 +134,7 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
-        event.target.classList.add('active');
+        if(event) event.target.classList.add('active');
         refresh();
     }
 
@@ -164,8 +155,6 @@
     function updateRatingStyle(totalRate) {
         const display = document.getElementById('total-rating');
         display.innerText = `Total Rate: ${totalRate}`;
-        
-        // クラスを一度すべてリセット
         display.className = 'rating-display';
 
         const val = parseFloat(totalRate);
@@ -234,20 +223,12 @@
     function updateAcc(index, value) {
         savedAccs[index] = parseFloat(value) || 0;
         localStorage.setItem('malody_acc_data', JSON.stringify(savedAccs));
-        
-        const allRates = songData.map((song, idx) => calculateSingleRate(savedAccs[idx] || 0, song.constant));
-        const top30 = allRates.sort((a, b) => b - a).slice(0, 30);
-        const total = (top30.reduce((a, b) => a + b, 0) / 30).toFixed(2);
-        updateRatingStyle(total);
+        refresh(); // 即座に全体を再描画
     }
 
     function saveAsImage() {
         const area = document.getElementById('capture-area');
-        html2canvas(area, { 
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            scale: 2
-        }).then(canvas => {
+        html2canvas(area, { useCORS: true, backgroundColor: "#ffffff", scale: 2 }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'malody-best30.png';
             link.href = canvas.toDataURL('image/png');
@@ -259,4 +240,4 @@
 </script>
 
 </body>
-</html>え
+</html>
