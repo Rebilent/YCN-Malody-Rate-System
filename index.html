@@ -7,9 +7,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* --- レートの文字色アニメーション設定 --- */
+        /* 透明化の設定を各クラスの中に閉じ込めることで、通常の文字が消えるのを防ぎます */
         .rate-rainbow {
             background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 200% auto;
             animation: rainbow-move 3s linear infinite;
@@ -23,6 +25,7 @@
         .rate-gold {
             background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: bold;
         }
@@ -30,10 +33,15 @@
         .rate-silver {
             background: linear-gradient(45deg, #959595, #ffffff, #707070);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .rate-normal { color: #3498db; }
+        /* 14未満のときは通常の青色で、透明化を無効にする */
+        .rate-normal { 
+            color: #3498db !important; 
+            -webkit-text-fill-color: initial !important; 
+        }
 
         /* --- 基本デザイン --- */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
@@ -47,7 +55,7 @@
         .screen { display: none; }
         .screen.active { display: block; }
 
-        .rating-display { text-align: center; font-size: 40px; font-weight: bold; margin: 20px 0; padding: 15px; background: #e8f4fd; border-radius: 8px; }
+        .rating-display { text-align: center; font-size: 40px; font-weight: bold; margin: 20px 0; padding: 15px; background: #e8f4fd; border-radius: 8px; min-height: 60px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: #3498db; color: white; padding: 12px; position: sticky; top: 0; z-index: 10; }
         td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
@@ -59,7 +67,6 @@
         .save-btn { background: #27ae60; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; font-size: 16px; }
         .save-btn:hover { background: #219150; }
 
-        /* 画像化する時に背景が白くなるように指定 */
         #capture-area { background: white; padding: 20px; border-radius: 12px; }
     </style>
 </head>
@@ -110,7 +117,7 @@
 </div>
 
 <script>
-    // --- 曲データ（imageに画像パスを追加できます） ---
+    // --- 曲データ ---
     const songData = [
         { name: "Shining (feat. 藍月なくる)", constant: 22.0, image: "images/shining.jpg" },
         { name: "World's end BLACKBOX", constant: 47.0, image: "images/blackbox.png" },
@@ -125,7 +132,7 @@
         { name: "第六天魔王", constant: 38.0, image: "" },
         { name: "Deicide feat.古泉葉", constant: 29.0, image: "" },
         { name: "Flechette", constant: 27.0, image: "" },
-        { name: "天照らす律動", constant: 28.0, image: "" },
+        { name: "天照らす律動", constant: 28.0, image: "" }
     ];
 
     let savedAccs = JSON.parse(localStorage.getItem('malody_acc_data')) || {};
@@ -157,7 +164,9 @@
     function updateRatingStyle(totalRate) {
         const display = document.getElementById('total-rating');
         display.innerText = `Total Rate: ${totalRate}`;
-        display.classList.remove('rate-rainbow', 'rate-gold', 'rate-silver', 'rate-normal');
+        
+        // クラスを一度すべてリセット
+        display.className = 'rating-display';
 
         const val = parseFloat(totalRate);
         if (val >= 16.0) display.classList.add('rate-rainbow');
@@ -176,7 +185,6 @@
             return { ...song, acc, rate, index };
         });
 
-        // 入力画面描画
         let inputSorted = [...allResults].sort((a, b) => {
             let valA = a[currentSortKey]; let valB = b[currentSortKey];
             if (typeof valA === 'string') return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -194,7 +202,6 @@
             `;
         });
 
-        // 結果画面描画
         let resultSorted = [...allResults].sort((a, b) => b.rate - a.rate).slice(0, 30);
         const top30Sum = resultSorted.reduce((sum, s) => sum + s.rate, 0);
         const totalRate = (top30Sum / 30).toFixed(2);
@@ -228,7 +235,6 @@
         savedAccs[index] = parseFloat(value) || 0;
         localStorage.setItem('malody_acc_data', JSON.stringify(savedAccs));
         
-        // 裏でトータルレートだけ更新
         const allRates = songData.map((song, idx) => calculateSingleRate(savedAccs[idx] || 0, song.constant));
         const top30 = allRates.sort((a, b) => b - a).slice(0, 30);
         const total = (top30.reduce((a, b) => a + b, 0) / 30).toFixed(2);
@@ -240,7 +246,7 @@
         html2canvas(area, { 
             useCORS: true,
             backgroundColor: "#ffffff",
-            scale: 2 // 高画質化
+            scale: 2
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'malody-best30.png';
@@ -253,4 +259,4 @@
 </script>
 
 </body>
-</html>
+</html>え
