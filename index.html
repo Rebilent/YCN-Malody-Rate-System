@@ -23,13 +23,13 @@
     <div class="rating-display" id="total-rating">Total Rate: 0.00</div>
 
     <table>
-        <thead>
-            <tr>
-                <th>曲名</th>
-                <th>難易度</th>
-                <th>Acc (%)</th>
-                <th>単曲レート</th>
-            </tr>
+       <thead>
+    <tr>
+        <th onclick="setSort('name')" style="cursor:pointer">曲名 ↕</th>
+        <th onclick="setSort('constant')" style="cursor:pointer">難易度 ↕</th>
+        <th onclick="setSort('acc')" style="cursor:pointer">Acc (%) ↕</th>
+        <th onclick="setSort('rate')" style="cursor:pointer">単曲レート ↕</th>
+    </tr>
         </thead>
         <tbody id="song-list">
             </tbody>
@@ -37,78 +37,87 @@
 </div>
 
 <script>
-    // --- ここに曲を追加していけます ---
-    const songData = [
-        { name: "Shining (feat. 藍月なくる)", constant: 22.0 },
-        { name: "World's end BLACKBOX", constant: 47.0 },
-        { name: "ソテリア", constant: 19.0 },
-        { name: "LΛ8YRИTH", constant: 42.0 },
-        { name: "AMA", constant: 40.0}
-        // ... 好きなだけ追加可能
-    ];
+    // 保存されているデータを読み込む
+let savedAccs = JSON.parse(localStorage.getItem('malody_acc_data')) || {};
+let currentSortKey = 'rate'; // 初期はレート順
+let isAsc = false;           // 初期は降順（大きい順）
 
-    // 保存されているAccデータを読み込む
-    let savedAccs = JSON.parse(localStorage.getItem('malody_acc_data')) || {};
+function calculateSingleRate(acc, constant) {
+    if (!acc || acc <= 0) return 0;
+    let bonus = 0;
+    if (acc >= 100) bonus = 3.0;
+    else if (acc >= 99.90) bonus = 2.0;
+    else if (acc >= 99.50) bonus = 1.5;
+    else if (acc >= 99.00) bonus = 1.0;
+    else if (acc >= 98.50) bonus = 0.8;
+    else if (acc >= 98.00) bonus = 0.5;
+    else if (acc >= 97.00) bonus = 0;
+    else bonus = -Math.floor((97.00 - acc) / 0.5) * 0.5;
+    return Math.max(0, constant + bonus);
+}
 
-    function calculateSingleRate(acc, constant) {
-        if (!acc || acc <= 0) return 0;
-        let bonus = 0;
-        if (acc >= 100) bonus = 3.0;
-        else if (acc >= 99.90) bonus = 2.0;
-        else if (acc >= 99.50) bonus = 1.5;
-        else if (acc >= 99.00) bonus = 1.0;
-        else if (acc >= 98.50) bonus = 0.8;
-        else if (acc >= 98.00) bonus = 0.5;
-        else if (acc >= 97.00) bonus = 0;
-        else bonus = -Math.floor((97.00 - acc) / 0.5) * 0.5;
-        return Math.max(0, constant + bonus);
+function refresh() {
+    const tbody = document.getElementById('song-list');
+    let results = songData.map((song, index) => {
+        const acc = savedAccs[index] || 0;
+        const rate = calculateSingleRate(acc, song.constant);
+        return { ...song, acc, rate, index };
+    });
+
+    // --- ソート処理 ---
+    results.sort((a, b) => {
+        let valA = a[currentSortKey];
+        let valB = b[currentSortKey];
+        
+        // 文字列（曲名）の場合は比較方法を変える
+        if (typeof valA === 'string') {
+            return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        // 数値（定数、レート）の場合
+        return isAsc ? valA - valB : valB - valA;
+    });
+
+    // トータルレート計算（ソートとは別に、純粋に上位30曲を抽出）
+    const top30 = [...results].sort((a, b) => b.rate - a.rate).slice(0, 30);
+    const top30Sum = top30.reduce((sum, s) => sum + s.rate, 0);
+    const totalRate = (top30Sum / 30).toFixed(2);
+    document.getElementById('total-rating').innerText = `Total Rate: ${totalRate}`;
+
+    // 描画
+    tbody.innerHTML = '';
+    const top30Ids = new Set(top30.map(s => s.index)); // 上位30曲のIDを保持
+
+    results.forEach((s) => {
+        const rowClass = top30Ids.has(s.index) ? 'top-30' : '';
+        tbody.innerHTML += `
+            <tr class="${rowClass}">
+                <td>${s.name}</td>
+                <td>${s.constant.toFixed(1)}</td>
+                <td><input type="number" value="${s.acc || ''}" step="0.01" oninput="updateAcc(${s.index}, this.value)"></td>
+                <td>${s.rate.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+}
+
+// ソートを切り替える関数
+function setSort(key) {
+    if (currentSortKey === key) {
+        isAsc = !isAsc; // 同じキーなら昇順・降順を反転
+    } else {
+        currentSortKey = key;
+        isAsc = false; // 新しいキーなら降順からスタート
     }
-
-    function refresh() {
-        const tbody = document.getElementById('song-list');
-        const results = [];
-
-        // 全曲の計算
-        songData.forEach((song, index) => {
-            const acc = savedAccs[index] || 0;
-            const rate = calculateSingleRate(acc, song.constant);
-            results.push({ ...song, acc, rate, index });
-        });
-
-        // レート順にソートして上位30曲を特定
-        const sorted = [...results].sort((a, b) => b.rate - a.rate);
-        const top30Threshold = sorted[29] ? sorted[29].rate : 0;
-
-        // トータルレート（上位30曲平均）
-        const top30Sum = sorted.slice(0, 30).reduce((sum, s) => sum + s.rate, 0);
-        const totalRate = (top30Sum / 30).toFixed(2);
-        document.getElementById('total-rating').innerText = `Total Rate: ${totalRate}`;
-
-        // テーブルの描画（表示は曲名順のままにするのが使いやすい）
-        tbody.innerHTML = '';
-        results.forEach((s) => {
-            const isTop30 = s.rate > 0 && s.rate >= top30Threshold;
-            const rowClass = isTop30 ? 'top-30' : '';
-            
-            tbody.innerHTML += `
-                <tr class="${rowClass}">
-                    <td>${s.name}</td>
-                    <td>${s.constant.toFixed(1)}</td>
-                    <td><input type="number" value="${s.acc || ''}" step="0.01" oninput="updateAcc(${s.index}, this.value)"></td>
-                    <td>${s.rate.toFixed(2)}</td>
-                </tr>
-            `;
-        });
-    }
-
-    function updateAcc(index, value) {
-        savedAccs[index] = parseFloat(value) || 0;
-        localStorage.setItem('malody_acc_data', JSON.stringify(savedAccs));
-        refresh(); // 入力のたびに再計算して表示を更新
-    }
-
-    // 最初の表示
     refresh();
+}
+
+function updateAcc(index, value) {
+    savedAccs[index] = parseFloat(value) || 0;
+    localStorage.setItem('malody_acc_data', JSON.stringify(savedAccs));
+    refresh();
+}
+
+refresh();
 </script>
 
 </body>
