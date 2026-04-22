@@ -3,41 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malody Best 30 Calculator</title>
+    <title>Malody Best 30 Calculator (FC Bonus)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* --- レートの文字色設定 --- */
-        .rating-display { 
-            text-align: center; 
-            font-size: 40px; 
-            font-weight: bold; 
-            margin: 20px 0; 
-            padding: 15px; 
-            background: #e8f4fd; 
-            border-radius: 8px; 
-            min-height: 60px;
-            color: #333;
-        }
-
-        .rate-rainbow {
-            background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
-            -webkit-background-clip: text !important;
-            background-clip: text !important;
-            color: rgba(0,0,0,0.2);
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: rainbow-move 3s linear infinite;
-        }
-
+        .rating-display { text-align: center; font-size: 40px; font-weight: bold; margin: 20px 0; padding: 15px; background: #e8f4fd; border-radius: 8px; min-height: 60px; color: #333; }
+        .rate-rainbow { background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); -webkit-background-clip: text !important; background-clip: text !important; color: rgba(0,0,0,0.2); -webkit-text-fill-color: transparent; background-size: 200% auto; animation: rainbow-move 3s linear infinite; }
         .rate-gold { color: #b38728 !important; -webkit-text-fill-color: initial !important; }
         .rate-silver { color: #707070 !important; -webkit-text-fill-color: initial !important; }
         .rate-normal { color: #3498db !important; -webkit-text-fill-color: initial !important; }
-
         @keyframes rainbow-move { to { background-position: 200% center; } }
-
-        /* --- 基本デザイン --- */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #2c3e50; }
         .nav-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .nav-btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; background: #bdc3c7; color: white; font-weight: bold; transition: 0.3s; }
@@ -47,33 +23,21 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: #3498db; color: white; padding: 12px; position: sticky; top: 0; z-index: 10; }
         td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
-        input[type="number"] { width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-
-        /* ジャケット画像のスタイル設定 */
-        .jacket-img { 
-            width: 45px; 
-            height: 45px; 
-            border-radius: 4px; 
-            object-fit: cover; 
-            vertical-align: middle; 
-            margin-right: 10px; 
-            background: #eee;
-            display: inline-block; /* 画像がない時も領域を確保 */
-        }
-
-        .info-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; }
+        input[type="number"] { width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+        input[type="checkbox"] { transform: scale(1.5); cursor: pointer; }
+        .jacket-img { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; vertical-align: middle; margin-right: 10px; background: #eee; display: inline-block; }
         .save-btn { background: #27ae60; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; font-size: 16px; }
         #capture-area { background: white; padding: 20px; border-radius: 12px; }
+        .fc-label { color: #e67e22; font-weight: bold; font-size: 0.8em; margin-left: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Malody Best 30</h1>
-
     <div class="nav-buttons">
-        <button class="nav-btn active" onclick="showScreen('input-screen')">Acc入力</button>
-        <button class="nav-btn" onclick="showScreen('result-screen')">ベスト枠表示</button>
+        <button class="nav-btn active" onclick="showScreen('input-screen', this)">Acc入力</button>
+        <button class="nav-btn" onclick="showScreen('result-screen', this)">ベスト枠表示</button>
     </div>
 
     <div id="input-screen" class="screen active">
@@ -83,6 +47,7 @@
                     <th onclick="setSort('name')" style="cursor:pointer">曲名 ↕</th>
                     <th onclick="setSort('constant')" style="cursor:pointer">難易度 ↕</th>
                     <th>Acc (%)</th>
+                    <th>FC</th>
                 </tr>
             </thead>
             <tbody id="input-list"></tbody>
@@ -109,9 +74,8 @@
 </div>
 
 <script>
-    // --- 曲データ ---
     const songData = [
-        { name: "Shining (feat. 藍月なくる)", constant: 22.0, image: "shining.jpg" },
+        { name: "Shining (feat. 藍月なくる)", constant: 22.0, image: "1200x630bb.jpg" },
         { name: "World's end BLACKBOX", constant: 47.0, image: "images/blackbox.png" },
         { name: "ソテリア", constant: 19.0, image: "" },
         { name: "LΛ8YRИTH", constant: 42.0, image: "" },
@@ -124,35 +88,27 @@
         { name: "第六天魔王", constant: 38.0, image: "" },
         { name: "Deicide feat.古泉葉", constant: 29.0, image: "" },
         { name: "Flechette", constant: 27.0, image: "" },
-        { name: "天照らす律動", constant: 28.0, image: "" },
-        { name: "The King's Return", constant: 45.0, image: "" },
-        { name: "The Devil Incarnate ", constant:41.0,},
-        { name: "QiXiN MAdN3ss 2153 ", constant:40.0,},
-        { name: "ZEUS", constant:41.0,},
-        { name: "∀NØMALY", constant:40.0,},
-        { name: "raputa", constant:39.0,},
-        { name: "How To Make 音ゲ～曲！", constant:37.0,},
-        { name: "#1f1e33", constant:37.0,},
-        { name: "鳳", constant:41.0,},
-        { name: "国士無双", constant:38.0,},
-        { name: "儚姫は原初に舞う", constant:36.0,},
+        { name: "天照らす律動", constant: 28.0, image: "" }
     ];
 
-    let savedAccs = JSON.parse(localStorage.getItem('malody_acc_data')) || {};
+    // 保存データを取得（AccとFCフラグの両方を保持）
+    let savedData = JSON.parse(localStorage.getItem('malody_play_data')) || {};
     let currentSortKey = 'constant'; 
     let isAsc = false;
 
-    function showScreen(screenId) {
+    function showScreen(screenId, btn) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
-        if(event) event.target.classList.add('active');
+        if(btn) btn.classList.add('active');
         refresh();
     }
 
-    function calculateSingleRate(acc, constant) {
+    // --- FCボーナス (+0.2) 込みの計算式 ---
+    function calculateSingleRate(acc, constant, isFC) {
         if (!acc || acc <= 0) return 0;
         let bonus = 0;
+
         if (acc >= 100) bonus = 2.5;
         else if (acc >= 99.50) bonus = 2.0 + (acc - 99.50);
         else if (acc >= 99.00) bonus = 1.5 + (acc - 99.00);
@@ -165,14 +121,18 @@
         else if (acc >= 95.50) bonus = 0.1 + (acc - 95.50);
         else if (acc >= 95.00) bonus = 0;
         else bonus = -Math.floor((95.00 - acc) / 0.5) * 0.5;
-        return Math.max(0, constant + bonus);
+
+        // FCボーナス加算
+        let finalRate = constant + bonus;
+        if (isFC) finalRate += 0.2;
+
+        return Math.max(0, finalRate);
     }
 
     function updateRatingStyle(totalRate) {
         const display = document.getElementById('total-rating');
         display.innerText = `Total Rate: ${totalRate}`;
         display.className = 'rating-display';
-
         const val = parseFloat(totalRate);
         if (val >= 16.0) display.classList.add('rate-rainbow');
         else if (val >= 15.0) display.classList.add('rate-gold');
@@ -185,9 +145,9 @@
         const resultTbody = document.getElementById('result-list');
         
         let allResults = songData.map((song, index) => {
-            const acc = savedAccs[index] || 0;
-            const rate = calculateSingleRate(acc, song.constant);
-            return { ...song, acc, rate, index };
+            const data = savedData[index] || { acc: 0, fc: false };
+            const rate = calculateSingleRate(data.acc, song.constant, data.fc);
+            return { ...song, ...data, rate, index };
         });
 
         let inputSorted = [...allResults].sort((a, b) => {
@@ -196,18 +156,15 @@
             return isAsc ? valA - valB : valB - valA;
         });
 
-        // 入力リスト描画
+        // 入力画面
         inputTbody.innerHTML = '';
         inputSorted.forEach(s => {
-            const imgSrc = s.image ? s.image : '';
             inputTbody.innerHTML += `
                 <tr>
-                    <td style="text-align:left">
-                        <img src="${imgSrc}" class="jacket-img" onerror="this.style.opacity='0'">
-                        ${s.name}
-                    </td>
+                    <td style="text-align:left"><img src="${s.image || ''}" class="jacket-img" onerror="this.style.opacity='0'">${s.name}</td>
                     <td>${s.constant.toFixed(1)}</td>
-                    <td><input type="number" value="${s.acc || ''}" step="0.01" oninput="updateAcc(${s.index}, this.value)"></td>
+                    <td><input type="number" value="${s.acc || ''}" step="0.01" oninput="updateValue(${s.index}, 'acc', this.value)"></td>
+                    <td><input type="checkbox" ${s.fc ? 'checked' : ''} onchange="updateValue(${s.index}, 'fc', this.checked)"></td>
                 </tr>
             `;
         });
@@ -219,17 +176,16 @@
         
         updateRatingStyle(totalRate);
 
-        // 結果リスト描画
+        // 結果画面
         resultTbody.innerHTML = '';
         resultSorted.forEach((s, i) => {
             if(s.rate <= 0) return;
-            const imgSrc = s.image ? s.image : '';
             resultTbody.innerHTML += `
                 <tr>
                     <td>${i + 1}</td>
                     <td style="text-align: left;">
-                        <img src="${imgSrc}" class="jacket-img" onerror="this.style.opacity='0'">
-                        ${s.name}
+                        <img src="${s.image || ''}" class="jacket-img" onerror="this.style.opacity='0'">
+                        ${s.name} ${s.fc ? '<span class="fc-label">FC!!</span>' : ''}
                     </td>
                     <td>${s.acc.toFixed(2)}%</td>
                     <td>${s.rate.toFixed(2)}</td>
@@ -238,16 +194,18 @@
         });
     }
 
+    function updateValue(index, key, value) {
+        if (!savedData[index]) savedData[index] = { acc: 0, fc: false };
+        if (key === 'acc') savedData[index].acc = parseFloat(value) || 0;
+        if (key === 'fc') savedData[index].fc = value;
+        localStorage.setItem('malody_play_data', JSON.stringify(savedData));
+        refresh();
+    }
+
     function setSort(key) {
         if (currentSortKey === key) isAsc = !isAsc;
         else { currentSortKey = key; isAsc = false; }
         refresh();
-    }
-
-    function updateAcc(index, value) {
-        savedAccs[index] = parseFloat(value) || 0;
-        localStorage.setItem('malody_acc_data', JSON.stringify(savedAccs));
-        refresh(); 
     }
 
     function saveAsImage() {
@@ -262,6 +220,5 @@
 
     refresh();
 </script>
-
 </body>
 </html>
