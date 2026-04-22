@@ -109,6 +109,7 @@
         if (!acc || acc <= 0) return 0;
         let bonus = 0;
 
+        // --- 通常のAccボーナス計算 ---
         if (acc >= 100) bonus = 2.5;
         else if (acc >= 99.50) bonus = 2.0 + (acc - 99.50);
         else if (acc >= 99.00) bonus = 1.5 + (acc - 99.00);
@@ -122,9 +123,13 @@
         else if (acc >= 95.00) bonus = 0;
         else bonus = -Math.floor((95.00 - acc) / 0.5) * 0.5;
 
-        // FCボーナス加算
         let finalRate = constant + bonus;
-        if (isFC) finalRate += 0.2;
+
+        // --- FCボーナスの判定 ---
+        // Accが100未満、かつFCチェックがある場合のみ +0.2
+        if (isFC && acc < 100) {
+            finalRate += 0.2;
+        }
 
         return Math.max(0, finalRate);
     }
