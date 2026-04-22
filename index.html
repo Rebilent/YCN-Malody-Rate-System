@@ -6,7 +6,7 @@
     <title>Malody Best 30 Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* --- レートの文字色設定（最優先） --- */
+        /* --- レートの文字色設定 --- */
         .rating-display { 
             text-align: center; 
             font-size: 40px; 
@@ -16,34 +16,22 @@
             background: #e8f4fd; 
             border-radius: 8px; 
             min-height: 60px;
-            color: #333; /* デフォルトの色を必ず指定 */
+            color: #333;
         }
 
-        /* 虹色設定：効かない環境でも文字が消えないように背景色を指定 */
         .rate-rainbow {
             background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
             -webkit-background-clip: text !important;
             background-clip: text !important;
-            color: rgba(0,0,0,0.2); /* 念のため少し色を残す */
+            color: rgba(0,0,0,0.2);
             -webkit-text-fill-color: transparent;
             background-size: 200% auto;
             animation: rainbow-move 3s linear infinite;
         }
 
-        .rate-gold {
-            color: #b38728 !important; /* 透明化を使わず、直接金色の色コードを指定 */
-            -webkit-text-fill-color: initial !important;
-        }
-
-        .rate-silver {
-            color: #707070 !important;
-            -webkit-text-fill-color: initial !important;
-        }
-
-        .rate-normal { 
-            color: #3498db !important; 
-            -webkit-text-fill-color: initial !important; 
-        }
+        .rate-gold { color: #b38728 !important; -webkit-text-fill-color: initial !important; }
+        .rate-silver { color: #707070 !important; -webkit-text-fill-color: initial !important; }
+        .rate-normal { color: #3498db !important; -webkit-text-fill-color: initial !important; }
 
         @keyframes rainbow-move { to { background-position: 200% center; } }
 
@@ -60,7 +48,19 @@
         th { background: #3498db; color: white; padding: 12px; position: sticky; top: 0; z-index: 10; }
         td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
         input[type="number"] { width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        .jacket-img { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; vertical-align: middle; margin-right: 10px; background: #eee; }
+
+        /* ジャケット画像のスタイル設定 */
+        .jacket-img { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 4px; 
+            object-fit: cover; 
+            vertical-align: middle; 
+            margin-right: 10px; 
+            background: #eee;
+            display: inline-block; /* 画像がない時も領域を確保 */
+        }
+
         .info-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; }
         .save-btn { background: #27ae60; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%; font-size: 16px; }
         #capture-area { background: white; padding: 20px; border-radius: 12px; }
@@ -109,6 +109,7 @@
 </div>
 
 <script>
+    // --- 曲データ ---
     const songData = [
         { name: "Shining (feat. 藍月なくる)", constant: 22.0, image: "1200x630bb.jpg" },
         { name: "World's end BLACKBOX", constant: 47.0, image: "images/blackbox.png" },
@@ -180,31 +181,39 @@
             return isAsc ? valA - valB : valB - valA;
         });
 
+        // 入力リスト描画
         inputTbody.innerHTML = '';
         inputSorted.forEach(s => {
+            const imgSrc = s.image ? s.image : '';
             inputTbody.innerHTML += `
                 <tr>
-                    <td style="text-align:left"><img src="${s.image || ''}" class="jacket-img" onerror="this.style.display='none'">${s.name}</td>
+                    <td style="text-align:left">
+                        <img src="${imgSrc}" class="jacket-img" onerror="this.style.opacity='0'">
+                        ${s.name}
+                    </td>
                     <td>${s.constant.toFixed(1)}</td>
                     <td><input type="number" value="${s.acc || ''}" step="0.01" oninput="updateAcc(${s.index}, this.value)"></td>
                 </tr>
             `;
         });
 
+        // ベスト30計算
         let resultSorted = [...allResults].sort((a, b) => b.rate - a.rate).slice(0, 30);
         const top30Sum = resultSorted.reduce((sum, s) => sum + s.rate, 0);
         const totalRate = (top30Sum / 30).toFixed(2);
         
         updateRatingStyle(totalRate);
 
+        // 結果リスト描画
         resultTbody.innerHTML = '';
         resultSorted.forEach((s, i) => {
             if(s.rate <= 0) return;
+            const imgSrc = s.image ? s.image : '';
             resultTbody.innerHTML += `
                 <tr>
                     <td>${i + 1}</td>
                     <td style="text-align: left;">
-                        <img src="${s.image || ''}" class="jacket-img" onerror="this.style.display='none'">
+                        <img src="${imgSrc}" class="jacket-img" onerror="this.style.opacity='0'">
                         ${s.name}
                     </td>
                     <td>${s.acc.toFixed(2)}%</td>
@@ -223,7 +232,7 @@
     function updateAcc(index, value) {
         savedAccs[index] = parseFloat(value) || 0;
         localStorage.setItem('malody_acc_data', JSON.stringify(savedAccs));
-        refresh(); // 即座に全体を再描画
+        refresh(); 
     }
 
     function saveAsImage() {
