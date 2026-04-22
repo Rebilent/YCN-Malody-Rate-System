@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malody Best 30 Calculator</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .rating-display { text-align: center; font-size: 32px; font-weight: bold; color: #3498db; margin: 20px 0; padding: 10px; background: #e8f4fd; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #3498db; color: white; padding: 12px; position: sticky; top: 0; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+        input[type="number"] { width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        tr.top-30 { background-color: #fff9e6; } /* 上位30曲を少し目立たせる */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Malody Best 30</h1>
+    <div class="rating-display" id="total-rating">Total Rate: 0.00</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>曲名</th>
+                <th>難易度</th>
+                <th>Acc (%)</th>
+                <th>単曲レート</th>
+            </tr>
+        </thead>
+        <tbody id="song-list">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    // --- ここに曲を追加していけます ---
+    const songData = [
+        { name: "Shining (feat. 藍月なくる)", constant: 22.0 },
+        { name: "World's end BLACKBOX", constant: 47.0 },
+        { name: "ソテリア", constant: 19.0 },
+        { name: "LΛ8YRИTH", constant: 42.0 },
+        { name: "AMA", constant: 40.0}
+        // ... 好きなだけ追加可能
+    ];
+
+    // 保存されているAccデータを読み込む
+    let savedAccs = JSON.parse(localStorage.getItem('malody_acc_data')) || {};
+
+    function calculateSingleRate(acc, constant) {
+        if (!acc || acc <= 0) return 0;
+        let bonus = 0;
+        if (acc >= 100) bonus = 3.0;
+        else if (acc >= 99.90) bonus = 2.0;
+        else if (acc >= 99.50) bonus = 1.5;
+        else if (acc >= 99.00) bonus = 1.0;
+        else if (acc >= 98.50) bonus = 0.8;
+        else if (acc >= 98.00) bonus = 0.5;
+        else if (acc >= 97.00) bonus = 0;
+        else bonus = -Math.floor((97.00 - acc) / 0.5) * 0.5;
+        return Math.max(0, constant + bonus);
+    }
+
+    function refresh() {
+        const tbody = document.getElementById('song-list');
+        const results = [];
+
+        // 全曲の計算
+        songData.forEach((song, index) => {
+            const acc = savedAccs[index] || 0;
+            const rate = calculateSingleRate(acc, song.constant);
+            results.push({ ...song, acc, rate, index });
+        });
+
+        // レート順にソートして上位30曲を特定
+        const sorted = [...results].sort((a, b) => b.rate - a.rate);
+        const top30Threshold = sorted[29] ? sorted[29].rate : 0;
+
+        // トータルレート（上位30曲平均）
+        const top30Sum = sorted.slice(0, 30).reduce((sum, s) => sum + s.rate, 0);
+        const totalRate = (top30Sum / 30).toFixed(2);
+        document.getElementById('total-rating').innerText = `Total Rate: ${totalRate}`;
+
+        // テーブルの描画（表示は曲名順のままにするのが使いやすい）
+        tbody.innerHTML = '';
+        results.forEach((s) => {
+            const isTop30 = s.rate > 0 && s.rate >= top30Threshold;
+            const rowClass = isTop30 ? 'top-30' : '';
+            
+            tbody.innerHTML += `
+                <tr class="${rowClass}">
+                    <td>${s.name}</td>
+                    <td>${s.constant.toFixed(1)}</td>
+                    <td><input type="number" value="${s.acc || ''}" step="0.01" oninput="updateAcc(${s.index}, this.value)"></td>
+                    <td>${s.rate.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function updateAcc(index, value) {
+        savedAccs[index] = parseFloat(value) || 0;
+        localStorage.setItem('malody_acc_data', JSON.stringify(savedAccs));
+        refresh(); // 入力のたびに再計算して表示を更新
+    }
+
+    // 最初の表示
+    refresh();
+</script>
+
+</body>
+</html>
