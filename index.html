@@ -6,8 +6,21 @@
     <title>Malody Best 30 Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        .rating-display { text-align: center; font-size: 40px; font-weight: bold; margin: 20px 0; padding: 15px; background: #e8f4fd; border-radius: 8px; color: #333; }
-        .rate-rainbow { background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); -webkit-background-clip: text !important; background-clip: text !important; color: rgba(0,0,0,0.2); -webkit-text-fill-color: transparent; background-size: 200% auto; animation: rainbow-move 3s linear infinite; }
+        .rating-display { text-align: center; font-size: 30px; font-weight: bold; margin: 20px 0; padding: 15px; background: #333; border-radius: 8px; color: #fff; }
+        .rank-text { font-size: 45px; display: block; margin-top: 5px; }
+        
+        /* ランクカラー定義 */
+        .color-white { color: #f0f0f0; }
+        .color-blue { color: #3498db; }
+        .color-green { color: #2ecc71; }
+        .color-yellow { color: #f1c40f; }
+        .color-red { color: #e74c3c; }
+        .color-purple { color: #9b59b6; }
+        .color-copper { color: #b87333; }
+        .color-silver { color: #bdc3c7; }
+        .color-gold { color: #f1c40f; text-shadow: 0 0 5px #d35400; }
+        .color-platinum { color: #7f8c8d; border: 2px solid #7f8c8d; padding: 0 10px; }
+        .color-rainbow { background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); -webkit-background-clip: text; color: transparent; animation: rainbow-move 3s linear infinite; }
         @keyframes rainbow-move { to { background-position: 200% center; } }
         
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
@@ -68,6 +81,7 @@
 
 <script>
     const songData = [
+        // (曲データは省略していますが、そのまま保持してください)
         { name: "Shining (feat. 藍月なくる)", constant: 22.0 },
         { name: "World's end BLACKBOX", constant: 47.0 },
         { name: "ソテリア", constant: 19.0 },
@@ -124,7 +138,6 @@
         { name: "わかれみち", constant:31.0},
         { name: "激運！七福ハッピークルー", constant:25.0},
         { name: "Flap&Clap", constant:29.0},
-        { name: " ", constant:23.0},
         { name: "あの日、あの部屋で、あったこと", constant:32.0},
         { name: "Breakcore WTF!?", constant:0.0},
         { name: "D/N/A", constant:16.0},
@@ -163,6 +176,21 @@
     let currentSortKey = 'constant'; 
     let isAsc = false;
 
+    function getRank(rate) {
+        if (rate >= 43.63) return { name: "虹", class: "color-rainbow" };
+        if (rate >= 39.99) return { name: "プラチナ", class: "color-platinum" };
+        if (rate >= 36.36) return { name: "金", class: "color-gold" };
+        if (rate >= 32.72) return { name: "銀", class: "color-silver" };
+        if (rate >= 29.08) return { name: "銅", class: "color-copper" };
+        if (rate >= 25.45) return { name: "紫", class: "color-purple" };
+        if (rate >= 21.81) return { name: "赤", class: "color-red" };
+        if (rate >= 18.18) return { name: "黄", class: "color-yellow" };
+        if (rate >= 14.54) return { name: "緑", class: "color-green" };
+        if (rate >= 7.27) return { name: "青", class: "color-blue" };
+        if (rate >= 3.63) return { name: "白", class: "color-white" };
+        return { name: "未ランク", class: "" };
+    }
+
     function calculateSingleRate(acc, constant, isFC) {
         if (!acc || acc <= 0) return 0;
         let bonus = 0;
@@ -194,7 +222,6 @@
             return { ...s, ...d, rate: calculateSingleRate(d.acc, s.constant, d.fc), index: i };
         });
 
-        // 入力画面 (oninputをonchangeに変更し、フォーカス外れを防止)
         inputTbody.innerHTML = '';
         [...all].sort((a,b) => {
             let valA = a[currentSortKey]; let valB = b[currentSortKey];
@@ -204,16 +231,14 @@
             inputTbody.innerHTML += `<tr><td style="text-align:left">${s.name}</td><td>${s.constant}</td><td><input type="number" value="${s.acc||''}" onchange="update(${s.index},'acc',this.value)"></td><td><input type="checkbox" ${s.fc?'checked':''} onchange="update(${s.index},'fc',this.checked)"></td></tr>`;
         });
 
-        // 全曲混ぜてレート順にソートして上位30曲を取得
         let sortedAll = all.sort((a,b) => b.rate - a.rate);
         let top30 = sortedAll.slice(0, 30);
-        let candidates = sortedAll.slice(30, 45); // 候補を少し多めに表示
+        let candidates = sortedAll.slice(30, 45);
 
-        // トータルレート計算 (上位30曲の平均)
         const total = (top30.reduce((a,b)=>a+b.rate, 0) / 30).toFixed(2);
+        const rank = getRank(total);
         const display = document.getElementById('total-rating');
-        display.innerText = `Total Rate: ${total}`;
-        display.className = 'rating-display ' + (total >= 16 ? 'rate-rainbow' : '');
+        display.innerHTML = `Total Rate: ${total}<span class="rank-text ${rank.class}">${rank.name}</span>`;
 
         const renderTable = (list, target, startIdx) => {
             target.innerHTML = list.map((s,i) => `<tr><td width="30">${startIdx + i + 1}</td><td style="text-align:left">${s.name}${s.fc?' <span class="fc-label">FC</span>':''}</td><td width="80">${s.acc.toFixed(2)}%</td><td width="60">${s.rate.toFixed(2)}</td></tr>`).join('');
