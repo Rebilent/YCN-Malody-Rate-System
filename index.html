@@ -108,7 +108,7 @@
         { name: "A.O.E::area_of_effect", constant:38.0},
         { name: "MAYHEM(DETRUO RE)", constant:40.0},
         { name: "LUNATiC CiRCUiT", constant:34.0},
-        { name: "R'N'R Monsta ", constant:34.0},
+        { name: "R'N'R Monsta", constant:34.0},
         { name: "Synthesis.", constant:38.0},
         { name: "NeruNeru-Chan travels to the Luminous Stars!", constant:37.0},
         { name: "燐華", constant:37.0},
@@ -156,8 +156,7 @@
         { name: "RetributationI(hard)", constant:34.0},
         { name: "Class Memories(6K SP?)", constant:55.0},
         { name: "Class Memories(LT19.6)", constant:35.0},
-        { name: "Algebra(SP?)", constant:61.0},
-        //{ name: "", constant:},
+        { name: "Algebra(SP?)", constant:61.0}
     ];
 
     let savedData = JSON.parse(localStorage.getItem('malody_play_data_v2')) || {};
@@ -195,20 +194,20 @@
             return { ...s, ...d, rate: calculateSingleRate(d.acc, s.constant, d.fc), index: i };
         });
 
-        // 入力画面
+        // 入力画面 (oninputをonchangeに変更し、フォーカス外れを防止)
         inputTbody.innerHTML = '';
         [...all].sort((a,b) => {
             let valA = a[currentSortKey]; let valB = b[currentSortKey];
             if(typeof valA === 'string') return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
             return isAsc ? valA - valB : valB - valA;
         }).forEach(s => {
-            inputTbody.innerHTML += `<tr><td style="text-align:left">${s.name}</td><td>${s.constant}</td><td><input type="number" value="${s.acc||''}" oninput="update(${s.index},'acc',this.value)"></td><td><input type="checkbox" ${s.fc?'checked':''} onchange="update(${s.index},'fc',this.checked)"></td></tr>`;
+            inputTbody.innerHTML += `<tr><td style="text-align:left">${s.name}</td><td>${s.constant}</td><td><input type="number" value="${s.acc||''}" onchange="update(${s.index},'acc',this.value)"></td><td><input type="checkbox" ${s.fc?'checked':''} onchange="update(${s.index},'fc',this.checked)"></td></tr>`;
         });
 
-        // レート順にソートして上位30曲を取得
+        // 全曲混ぜてレート順にソートして上位30曲を取得
         let sortedAll = all.sort((a,b) => b.rate - a.rate);
         let top30 = sortedAll.slice(0, 30);
-        let candidates = sortedAll.slice(30, 40);
+        let candidates = sortedAll.slice(30, 45); // 候補を少し多めに表示
 
         // トータルレート計算 (上位30曲の平均)
         const total = (top30.reduce((a,b)=>a+b.rate, 0) / 30).toFixed(2);
