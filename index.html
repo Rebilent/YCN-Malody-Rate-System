@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malody Rate Calculator Pro (Text Only)</title>
+    <title>Malody Best 30 Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         .rating-display { text-align: center; font-size: 40px; font-weight: bold; margin: 20px 0; padding: 15px; background: #e8f4fd; border-radius: 8px; color: #333; }
@@ -25,18 +25,17 @@
         
         input[type="number"] { width: 65px; padding: 5px; border-radius: 4px; border: 1px solid #ddd; }
         .fc-label { color: #e67e22; font-weight: bold; font-size: 0.8em; margin-left: 5px; }
-        .new-badge { background: #e74c3c; color: white; font-size: 0.7em; padding: 2px 5px; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
         .save-btn { background: #27ae60; color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1em; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Malody Rate Calculator</h1>
+    <h1>Malody Best 30</h1>
     
     <div class="nav-buttons">
         <button class="nav-btn active" onclick="showScreen('input-screen', this)">データ入力</button>
-        <button class="nav-btn" onclick="showScreen('result-screen', this)">レート表示</button>
+        <button class="nav-btn" onclick="showScreen('result-screen', this)">ベスト枠表示</button>
     </div>
 
     <div id="input-screen" class="screen active">
@@ -58,13 +57,10 @@
         <div id="capture-area" style="background: white; padding: 20px;">
             <div class="rating-display" id="total-rating">Total Rate: 0.00</div>
             
-            <div class="section-title">New Songs Top 10 (新曲枠)</div>
-            <table><tbody id="new-list"></tbody></table>
-
-            <div class="section-title">Best Songs Top 30 (ベスト枠)</div>
+            <div class="section-title">Best 30 Songs</div>
             <table><tbody id="best-list"></tbody></table>
 
-            <div class="section-title">Sub Candidates (候補曲 31位～)</div>
+            <div class="section-title">Candidates (31st～)</div>
             <table><tbody id="sub-list"></tbody></table>
         </div>
     </div>
@@ -72,41 +68,52 @@
 
 <script>
     const songData = [
-        { name: "Shining (feat. 藍月なくる)", constant: 22.0, isNew: true },
-        { name: "World's end BLACKBOX", constant: 47.0, isNew: true },
-        { name: "ソテリア", constant: 19.0, isNew: false },
-        { name: "LΛ8YRИTH", constant: 42.0, isNew: false },
-        { name: "AMA", constant: 40.0, isNew: false },
-        { name: "Attractor Dimension", constant: 43.0, isNew: false },
-        { name: "Onus Regulus", constant: 44.0, isNew: false },
-        { name: "SELENE-UI", constant: 41.0, isNew: false },
-        { name: "ARTEMiS", constant: 29.0, isNew: false },
-        { name: "Redemptione", constant: 37.0, isNew: false },
-        { name: "第六天魔王", constant: 38.0, isNew: false },
-        { name: "Deicide feat.古泉葉", constant: 29.0, isNew: false },
-        { name: "Flechette", constant: 27.0, isNew: false },
-        { name: "天照らす律動", constant: 28.0, isNew: false },
-        { name: "The King's Return", constant: 45.0, isNew: true },
-        { name: "The Devil Incarnate", constant: 41.0, isNew: true },
-        { name: "QiXiN MAdN3ss 2153", constant: 40.0, isNew: true },
-        { name: "ZEUS", constant: 41.0, isNew: true },
-        { name: "∀NØMALY", constant: 40.0, isNew: true },
-        { name: "raputa", constant: 39.0, isNew: true },
-        { name: "How To Make 音ゲ～曲！", constant: 37.0, isNew: true },
-        { name: "#1f1e33", constant: 37.0, isNew: true },
-        { name: "鳳", constant: 41.0, isNew: false },
-        { name: "国士無双", constant: 38.0, isNew: false },
-        { name: "儚姫は原初に舞う", constant: 36.0, isNew: false },
-        { name: "Red to Red", constant: 27.0, isNew: false },
-        { name: "Re : Unknown X", constant: 44.0, isNew: false },
-        { name: "Apollo", constant: 39.0, isNew: false },
-        { name: "SuddenИDeath", constant: 40.0, isNew: false },
-        { name: "Wolves Standing Towards Enemies", constant: 36.0, isNew: false },
-        { name: "Pendemonium", constant: 37.0, isNew: false },
-        { name: "THE PEERLESS UNDER HEAVEN", constant: 34.0, isNew: false },
-        { name: "魔王", constant: 39.0, isNew: false },
-        { name: "Spin Eternally", constant: 38.0, isNew: false },
-        { name: "CUT! into the FUTURE", constant: 38.0, isNew: false }
+        { name: "Shining (feat. 藍月なくる)", constant: 22.0 },
+        { name: "World's end BLACKBOX", constant: 47.0 },
+        { name: "ソテリア", constant: 19.0 },
+        { name: "LΛ8YRИTH", constant: 42.0 },
+        { name: "AMA", constant: 40.0 },
+        { name: "Attractor Dimension", constant: 43.0 },
+        { name: "Onus Regulus", constant: 44.0 },
+        { name: "SELENE-UI", constant: 41.0 },
+        { name: "ARTEMiS", constant: 29.0 },
+        { name: "Redemptione", constant: 37.0 },
+        { name: "第六天魔王", constant: 38.0 },
+        { name: "Deicide feat.古泉葉", constant: 29.0 },
+        { name: "Flechette", constant: 27.0 },
+        { name: "天照らす律動", constant: 28.0 },
+        { name: "The King's Return", constant: 45.0 },
+        { name: "The Devil Incarnate", constant: 41.0 },
+        { name: "QiXiN MAdN3ss 2153", constant: 40.0 },
+        { name: "ZEUS", constant: 41.0 },
+        { name: "∀NØMALY", constant: 40.0 },
+        { name: "raputa", constant: 39.0 },
+        { name: "How To Make 音ゲ～曲！", constant: 37.0 },
+        { name: "#1f1e33", constant: 37.0 },
+        { name: "鳳", constant: 41.0 },
+        { name: "国士無双", constant: 38.0 },
+        { name: "儚姫は原初に舞う", constant: 36.0 },
+        { name: "Red to Red", constant: 27.0 },
+        { name: "Re : Unknown X", constant: 44.0 },
+        { name: "Apollo", constant: 39.0 },
+        { name: "SuddenИDeath", constant: 40.0 },
+        { name: "Wolves Standing Towards Enemies", constant: 36.0 },
+        { name: "Pendemonium", constant: 37.0 },
+        { name: "THE PEERLESS UNDER HEAVEN", constant: 34.0 },
+        { name: "魔王", constant: 39.0 },
+        { name: "Spin Eternally", constant: 38.0 },
+        { name: "CUT! into the FUTURE", constant: 38.0 },
+        { name: "7thSense", constant:31.0},
+        { name: "Dimensional Exploration", constant:38.0},
+        { name: "A.O.E::area_of_effect", constant:38.0},
+        { name: "MAYHEM(DETRUO RE)", constant:40.0},
+        { name: "LUNATiC CiRCUiT", constant:34.0},
+        { name: "R'N'R Monsta ", constant:34.0},
+        { name: "Synthesis.", constant:38.0},
+        { name: "NeruNeru-Chan travels to the Luminous Stars!", constant:37.0},
+        { name: "燐華", constant:37.0},
+        { name: "Last Wish", constant:39.0},
+        //{ name: "", constant:},
     ];
 
     let savedData = JSON.parse(localStorage.getItem('malody_play_data_v2')) || {};
@@ -136,7 +143,6 @@
 
     function refresh() {
         const inputTbody = document.getElementById('input-list');
-        const newList = document.getElementById('new-list');
         const bestList = document.getElementById('best-list');
         const subList = document.getElementById('sub-list');
 
@@ -145,36 +151,33 @@
             return { ...s, ...d, rate: calculateSingleRate(d.acc, s.constant, d.fc), index: i };
         });
 
-        // 入力画面 (ジャケット列を削除)
+        // 入力画面
         inputTbody.innerHTML = '';
         [...all].sort((a,b) => {
             let valA = a[currentSortKey]; let valB = b[currentSortKey];
             if(typeof valA === 'string') return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
             return isAsc ? valA - valB : valB - valA;
         }).forEach(s => {
-            inputTbody.innerHTML += `<tr><td style="text-align:left">${s.name}${s.isNew?'<span class="new-badge">NEW</span>':''}</td><td>${s.constant}</td><td><input type="number" value="${s.acc||''}" oninput="update(${s.index},'acc',this.value)"></td><td><input type="checkbox" ${s.fc?'checked':''} onchange="update(${s.index},'fc',this.checked)"></td></tr>`;
+            inputTbody.innerHTML += `<tr><td style="text-align:left">${s.name}</td><td>${s.constant}</td><td><input type="number" value="${s.acc||''}" oninput="update(${s.index},'acc',this.value)"></td><td><input type="checkbox" ${s.fc?'checked':''} onchange="update(${s.index},'fc',this.checked)"></td></tr>`;
         });
 
-        // 枠の計算
-        let news = all.filter(s => s.isNew).sort((a,b) => b.rate - a.rate);
-        let normal = all.filter(s => !s.isNew).sort((a,b) => b.rate - a.rate);
+        // レート順にソートして上位30曲を取得
+        let sortedAll = all.sort((a,b) => b.rate - a.rate);
+        let top30 = sortedAll.slice(0, 30);
+        let candidates = sortedAll.slice(30, 40);
 
-        let topNew = news.slice(0, 10);
-        let topBest = normal.slice(0, 30);
-        let candidates = [...news.slice(10), ...normal.slice(30)].sort((a,b) => b.rate - a.rate).slice(0, 10);
-
-        const total = ((topNew.reduce((a,b)=>a+b.rate,0) + topBest.reduce((a,b)=>a+b.rate,0)) / 40).toFixed(2);
+        // トータルレート計算 (上位30曲の平均)
+        const total = (top30.reduce((a,b)=>a+b.rate, 0) / 30).toFixed(2);
         const display = document.getElementById('total-rating');
         display.innerText = `Total Rate: ${total}`;
         display.className = 'rating-display ' + (total >= 16 ? 'rate-rainbow' : '');
 
-        const renderTable = (list, target) => {
-            target.innerHTML = list.map((s,i) => `<tr><td width="30">${i+1}</td><td style="text-align:left">${s.name}${s.fc?' <span class="fc-label">FC</span>':''}</td><td width="80">${s.acc.toFixed(2)}%</td><td width="60">${s.rate.toFixed(2)}</td></tr>`).join('');
+        const renderTable = (list, target, startIdx) => {
+            target.innerHTML = list.map((s,i) => `<tr><td width="30">${startIdx + i + 1}</td><td style="text-align:left">${s.name}${s.fc?' <span class="fc-label">FC</span>':''}</td><td width="80">${s.acc.toFixed(2)}%</td><td width="60">${s.rate.toFixed(2)}</td></tr>`).join('');
         };
 
-        renderTable(topNew, newList);
-        renderTable(topBest, bestList);
-        renderTable(candidates, subList);
+        renderTable(top30, bestList, 0);
+        renderTable(candidates, subList, 30);
     }
 
     function update(i, k, v) {
@@ -200,7 +203,7 @@
     function saveAsImage() {
         html2canvas(document.getElementById('capture-area'), { scale: 2 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'rate_result.png';
+            link.download = 'best30_result.png';
             link.href = canvas.toDataURL();
             link.click();
         });
