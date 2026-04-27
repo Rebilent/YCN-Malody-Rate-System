@@ -44,6 +44,8 @@
         input[type="number"] { width: 65px; padding: 6px; border-radius: 4px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color); }
         .save-btn { background: #27ae60; color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; margin-bottom: 10px; }
         .fc-label { color: #e67e22; font-weight: bold; font-size: 0.8em; }
+        .rank-user { display: flex; align-items: center; gap: 10px; text-align: left; }
+        .rank-avatar { width: 24px; height: 24px; border-radius: 50%; }
     </style>
 </head>
 <body>
@@ -60,6 +62,7 @@
     <div class="nav-buttons">
         <button class="nav-btn active" onclick="showScreen('input-screen', this)">データ入力</button>
         <button class="nav-btn" onclick="showScreen('result-screen', this)">ベスト枠表示</button>
+        <button class="nav-btn" onclick="showScreen('ranking-screen', this)">ランキング</button>
     </div>
 
     <div id="input-screen" class="screen active">
@@ -86,11 +89,28 @@
             <table><tbody id="sub-list"></tbody></table>
         </div>
     </div>
+
+    <div id="ranking-screen" class="screen">
+        <button class="save-btn" style="background:#3498db" onclick="sendToRanking()">📊 自分のスコアを送信</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>User</th>
+                    <th>Rate</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-list"></tbody>
+        </table>
+    </div>
 </div>
 
 <script>
     const CLIENT_ID = '1498278834242588834';
-    const REDIRECT_URI = window.location.href.split('#')[0].split('?')[0]; 
+    const REDIRECT_URI = window.location.href.split('#')[0].split('?')[0];
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzBoygQdgUomo1f1kWJ71-rfVD1WekdSx80UEq1FEHw_12ZS9NLC6Pi4GYu_SM25ESSYg/exec'; 
+    
+    let currentUser = { name: "Guest", avatar: "" };
 
     function loginDiscord() {
         const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
@@ -105,6 +125,7 @@
             .then(res => res.json())
             .then(user => {
                 const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://discord.com/assets/322c936a8c8be118e9a548f0653b47e2.solid.png';
+                currentUser = { name: user.username, avatar: avatarUrl };
                 document.getElementById('discord-section').innerHTML = `
                     <img src="${avatarUrl}" class="user-avatar">
                     <strong>${user.username}</strong>
@@ -116,90 +137,90 @@
     }
 
     const songData = [
-        { name: "Shining (feat. 藍月なくる)", constant: 22.0 }, 
-        { name: "World's end BLACKBOX", constant: 47.0 }, 
+        { name: "Shining (feat. 藍月なくる)", constant: 22.0 },
+        { name: "World's end BLACKBOX", constant: 47.0 },
         { name: "ソテリア", constant: 19.0 },
-        { name: "LΛ8YRИTH", constant: 42.0 }, 
-        { name: "AMA", constant: 40.0 }, 
+        { name: "LΛ8YRИTH", constant: 42.0 },
+        { name: "AMA", constant: 40.0 },
         { name: "Attractor Dimension", constant: 43.0 },
-        { name: "Onus Regulus", constant: 44.0 }, 
-        { name: "SELENE-UI", constant: 41.0 }, 
+        { name: "Onus Regulus", constant: 44.0 },
+        { name: "SELENE-UI", constant: 41.0 },
         { name: "ARTEMiS", constant: 29.0 },
-        { name: "Redemptione", constant: 37.0 }, 
-        { name: "第六天魔王", constant: 38.0 }, 
+        { name: "Redemptione", constant: 37.0 },
+        { name: "第六天魔王", constant: 38.0 },
         { name: "Deicide feat.古泉葉", constant: 29.0 },
-        { name: "Flechette", constant: 27.0 }, 
-        { name: "天照らす律動", constant: 28.0 }, 
+        { name: "Flechette", constant: 27.0 },
+        { name: "天照らす律動", constant: 28.0 },
         { name: "The King's Return", constant: 45.0 },
-        { name: "The Devil Incarnate", constant: 41.0 }, 
-        { name: "QiXiN MAdN3ss 2153", constant: 40.0 }, 
+        { name: "The Devil Incarnate", constant: 41.0 },
+        { name: "QiXiN MAdN3ss 2153", constant: 40.0 },
         { name: "ZEUS", constant: 41.0 },
-        { name: "∀NØMALY", constant: 40.0 }, 
-        { name: "raputa", constant: 39.0 }, 
+        { name: "∀NØMALY", constant: 40.0 },
+        { name: "raputa", constant: 39.0 },
         { name: "How To Make 音ゲ～曲！", constant: 37.0 },
-        { name: "#1f1e33", constant: 37.0 }, 
-        { name: "鳳", constant: 41.0 }, 
+        { name: "#1f1e33", constant: 37.0 },
+        { name: "鳳", constant: 41.0 },
         { name: "国士無双", constant: 38.0 },
-        { name: "儚姫は原初に舞う", constant: 36.0 }, 
+        { name: "儚姫は原初に舞う", constant: 36.0 },
         { name: "Red to Red", constant: 27.0 },
         { name: "Re : Unknown X", constant: 44.0 },
-        { name: "Apollo", constant: 39.0 }, 
-        { name: "SuddenИDeath", constant: 40.0 }, 
+        { name: "Apollo", constant: 39.0 },
+        { name: "SuddenИDeath", constant: 40.0 },
         { name: "Wolves Standing Towards Enemies", constant: 36.0 },
         { name: "Pendemonium", constant: 37.0 },
         { name: "THE PEERLESS UNDER HEAVEN", constant: 34.0 },
         { name: "魔王", constant: 39.0 },
-        { name: "Spin Eternally", constant: 38.0 }, 
-        { name: "CUT! into the FUTURE", constant: 38.0 }, 
-        { name: "7thSense", constant:31.0},
-        { name: "Dimensional Exploration", constant:38.0}, 
-        { name: "A.O.E::area_of_effect", constant:38.0}, 
-        { name: "MAYHEM(DETRUO RE)", constant:40.0},
-        { name: "LUNATiC CiRCUiT", constant:34.0}, 
-        { name: "R'N'R Monsta", constant:34.0}, 
-        { name: "Synthesis.", constant:38.0},
-        { name: "NeruNeru-Chan travels to the Luminous Stars!", constant:37.0},
-        { name: "燐華", constant:37.0},
-        { name: "Last Wish", constant:39.0},
-        { name: "永眠のすゝめ", constant:24.0}, 
-        { name: "Re:End of a Dream(Long Ver.)", constant:33.0},
-        { name: "ずんずんサファリ(Remix)", constant:25.0},
-        { name: "ずんずんサファリ", constant:23.0},
-        { name: "Snooze", constant:27.0}, 
-        { name: "おしゃまなプリンセス", constant:28.0},
-        { name: "Executioner(Master)", constant:34.0}, 
-        { name: "Executioner(Execution)", constant:50.0}, 
-        { name: "わかれみち", constant:31.0},
-        { name: "激運！七福ハッピークルー", constant:25.0}, 
-        { name: "Flap&Clap", constant:29.0}, 
-        { name: "あの日、あの部屋で、あったこと", constant:32.0},
-        { name: "D/N/A", constant:16.0}, 
-        { name: "Viyella's Scream", constant:0.0}, 
-        { name: "驟雨の狭間", constant:38.0},
-        { name: "Distance", constant:19.0}, 
-        { name: "Pure Ruby", constant:37.0}, 
-        { name: "Pure Ruby", constant:40.0},
-        { name: "Time Leaper", constant:41.0}, 
-        { name: "One Forgotten Night", constant:36.0}, 
-        { name: "Sevcon", constant:29.0},
-        { name: "Shiawase (VIP)", constant:39.0}, 
-        { name: "Shiawase (VIP)", constant:37.0},
-        { name: "Distance", constant:36.0},
-        { name: "Clock Paradox(IN 14.5)", constant:21.0}, 
-        { name: "Clock Paradox(AT 15.8(remake))", constant:43.0},
-        { name: "Clock Paradox(AT 15.4)", constant:25.0}, 
-        { name: "Ludicrous speed(AF+?)", constant:32.0},
-        { name: "Ludicrous speed(SP?)", constant:63.0}, 
-        { name: "Brilliant Blue", constant:34.0},
-        { name: "平衡世界 -parallel world-(EZ7.4)", constant:9.0}, 
-        { name: "平衡世界 -parallel world-(IN 15.4)", constant:30.0},
-        { name: "平衡世界 -parallel world-(9K SP?)", constant:61.0}, 
-        { name: "平衡世界 -parallel world-(HD11.8)", constant:21.0},
-        { name: "RetributationI(V-hard)", constant:54.0}, 
-        { name: "RetributationI(hard)", constant:34.0},
-        { name: "Class Memories(6K SP?)", constant:55.0}, 
-        { name: "Class Memories(LT19.6)", constant:35.0}, 
-        { name: "Algebra(SP?)", constant:61.0}
+        { name: "Spin Eternally", constant: 38.0 },
+        { name: "CUT! into the FUTURE", constant: 38.0 },
+        { name: "7thSense", constant: 31.0 },
+        { name: "Dimensional Exploration", constant: 38.0 },
+        { name: "A.O.E::area_of_effect", constant: 38.0 },
+        { name: "MAYHEM(DETRUO RE)", constant: 40.0 },
+        { name: "LUNATiC CiRCUiT", constant: 34.0 },
+        { name: "R'N'R Monsta", constant: 34.0 },
+        { name: "Synthesis.", constant: 38.0 },
+        { name: "NeruNeru-Chan travels to the Luminous Stars!", constant: 37.0 },
+        { name: "燐華", constant: 37.0 },
+        { name: "Last Wish", constant: 39.0 },
+        { name: "永眠のすゝめ", constant: 24.0 },
+        { name: "Re:End of a Dream(Long Ver.)", constant: 33.0 },
+        { name: "ずんずんサファリ(Remix)", constant: 25.0 },
+        { name: "ずんずんサファリ", constant: 23.0 },
+        { name: "Snooze", constant: 27.0 },
+        { name: "おしゃまなプリンセス", constant: 28.0 },
+        { name: "Executioner(Master)", constant: 34.0 },
+        { name: "Executioner(Execution)", constant: 50.0 },
+        { name: "わかれみち", constant: 31.0 },
+        { name: "激運！七福ハッピークルー", constant: 25.0 },
+        { name: "Flap&Clap", constant: 29.0 },
+        { name: "あの日、あの部屋で、あったこと", constant: 32.0 },
+        { name: "D/N/A", constant: 16.0 },
+        { name: "Viyella's Scream", constant: 0.0 },
+        { name: "驟雨の狭間", constant: 38.0 },
+        { name: "Distance", constant: 19.0 },
+        { name: "Pure Ruby", constant: 37.0 },
+        { name: "Pure Ruby", constant: 40.0 },
+        { name: "Time Leaper", constant: 41.0 },
+        { name: "One Forgotten Night", constant: 36.0 },
+        { name: "Sevcon", constant: 29.0 },
+        { name: "Shiawase (VIP)", constant: 39.0 },
+        { name: "Shiawase (VIP)", constant: 37.0 },
+        { name: "Distance", constant: 36.0 },
+        { name: "Clock Paradox(IN 14.5)", constant: 21.0 },
+        { name: "Clock Paradox(AT 15.8(remake))", constant: 43.0 },
+        { name: "Clock Paradox(AT 15.4)", constant: 25.0 },
+        { name: "Ludicrous speed(AF+?)", constant: 32.0 },
+        { name: "Ludicrous speed(SP?)", constant: 63.0 },
+        { name: "Brilliant Blue", constant: 34.0 },
+        { name: "平衡世界 -parallel world-(EZ7.4)", constant: 9.0 },
+        { name: "平衡世界 -parallel world-(IN 15.4)", constant: 30.0 },
+        { name: "平衡世界 -parallel world-(9K SP?)", constant: 61.0 },
+        { name: "平衡世界 -parallel world-(HD11.8)", constant: 21.0 },
+        { name: "RetributationI(V-hard)", constant: 54.0 },
+        { name: "RetributationI(hard)", constant: 34.0 },
+        { name: "Class Memories(6K SP?)", constant: 55.0 },
+        { name: "Class Memories(LT19.6)", constant: 35.0 },
+        { name: "Algebra(SP?)", constant: 61.0 }
     ];
 
     let savedData = JSON.parse(localStorage.getItem('malody_play_data_v2')) || {};
@@ -259,7 +280,15 @@
     }
 
     function setSort(key) { if (currentSortKey === key) isAsc = !isAsc; else { currentSortKey = key; isAsc = false; } refresh(); }
-    function showScreen(id, btn) { document.querySelectorAll('.screen, .nav-btn').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); refresh(); }
+    
+    function showScreen(id, btn) { 
+        document.querySelectorAll('.screen, .nav-btn').forEach(el => el.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+        btn.classList.add('active'); 
+        if(id === 'ranking-screen') loadRanking();
+        refresh(); 
+    }
+
     function toggleTheme() {
         const body = document.documentElement;
         const isDark = body.getAttribute('data-theme') === 'dark';
@@ -274,6 +303,42 @@
         html2canvas(area, { scale: 2, backgroundColor: currentBg }).then(canvas => {
             const link = document.createElement('a'); link.download = 'malody_best30.png'; link.href = canvas.toDataURL(); link.click();
         });
+    }
+
+    async function sendToRanking() {
+        if (currentUser.name === "Guest") return alert("Discordログインが必要です！");
+        if (GAS_URL === 'YOUR_GAS_WEBAPP_URL_HERE') return alert("GASのURLが設定されていません。");
+        const rate = document.getElementById('total-rating').innerText.replace('Total Rate: ', '');
+        
+        try {
+            await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ name: currentUser.name, rate: rate, avatar: currentUser.avatar })
+            });
+            alert("ランキングに送信しました！");
+            loadRanking();
+        } catch(e) { alert("送信に失敗しました。"); }
+    }
+
+    async function loadRanking() {
+        if (GAS_URL === 'YOUR_GAS_WEBAPP_URL_HERE') return;
+        try {
+            const res = await fetch(GAS_URL);
+            const data = await res.json();
+            data.sort((a, b) => b.rate - a.rate);
+            const list = document.getElementById('ranking-list');
+            list.innerHTML = data.map((u, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>
+                        <div class="rank-user">
+                            <img src="${u.avatar}" class="rank-avatar"> ${u.name}
+                        </div>
+                    </td>
+                    <td>${u.rate}</td>
+                </tr>
+            `).join('');
+        } catch(e) { console.error("Ranking load failed"); }
     }
 
     window.onload = () => {
