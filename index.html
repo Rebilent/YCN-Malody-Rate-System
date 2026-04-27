@@ -6,82 +6,55 @@
     <title>Malody Best 30 Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* --- 基本変数（ライトモード） --- */
-        :root {
-            --bg-color: #f4f7f6;
-            --container-bg: #ffffff;
-            --text-color: #333333;
-            --table-border: #eeeeee;
-            --input-bg: #ffffff;
-            --input-border: #dddddd;
-            --nav-bg: #bdc3c7;
-            --header-bg: #3498db;
-        }
+        :root { --bg-color: #f4f7f6; --container-bg: #ffffff; --text-color: #333333; --table-border: #eeeeee; --input-bg: #ffffff; --input-border: #dddddd; --nav-bg: #bdc3c7; --header-bg: #3498db; }
+        [data-theme="dark"] { --bg-color: #121212; --container-bg: #1e1e1e; --text-color: #e0e0e0; --table-border: #333333; --input-bg: #2d2d2d; --input-border: #444444; --nav-bg: #34495e; --header-bg: #2980b9; }
 
-        /* --- ダークモード変数 --- */
-        [data-theme="dark"] {
-            --bg-color: #121212;
-            --container-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --table-border: #333333;
-            --input-bg: #2d2d2d;
-            --input-border: #444444;
-            --nav-bg: #34495e;
-            --header-bg: #2980b9;
-        }
-
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg-color); padding: 20px; color: var(--text-color); transition: background 0.3s, color 0.3s; }
-        .container { max-width: 900px; margin: 0 auto; background: var(--container-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg-color); padding: 20px; color: var(--text-color); transition: 0.3s; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--container-bg); padding: 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         
-        /* テーマ切り替えボタン */
-        .theme-toggle { position: absolute; top: 20px; right: 20px; cursor: pointer; background: var(--nav-bg); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8em; }
-
-        /* レート表示エリア */
-        .rating-display { 
-            text-align: center; font-size: 36px; font-weight: bold; margin: 20px 0; padding: 25px; border-radius: 12px; 
-            color: #fff; transition: all 0.5s ease; text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-        }
-
-        /* ランク別背景（ダークモードでも映えるよう光沢強化） */
-        .bg-none     { background: #7f8c8d; }
-        .bg-white    { background: #ecf0f1; color: #333 !important; border: 1px solid #bdc3c7; }
-        .bg-blue     { background: #3498db; box-shadow: 0 0 10px rgba(52, 152, 219, 0.5); }
-        .bg-green    { background: #2ecc71; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
-        .bg-yellow   { background: #f1c40f; color: #333 !important; }
-        .bg-red      { background: #e74c3c; box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); }
-        .bg-purple   { background: #9b59b6; box-shadow: 0 0 10px rgba(155, 89, 182, 0.5); }
-        .bg-copper   { background: linear-gradient(135deg, #a86b4c, #b87333, #8a5a3c); }
-        .bg-silver   { background: linear-gradient(135deg, #bdc3c7, #ffffff, #7f8c8d); color: #333 !important; }
-        .bg-gold     { background: linear-gradient(135deg, #f1c40f, #fff200, #d4af37); color: #333 !important; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); }
-        .bg-platinum { background: linear-gradient(135deg, #e5e5e5, #ffffff, #b0b0b0); color: #333 !important; border: 1px solid #7f8c8d; }
-        .bg-rainbow  { 
-            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
-            background-size: 400% 400%; animation: rainbow-bg 5s ease infinite;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-        @keyframes rainbow-bg { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .user-profile { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 10px; background: rgba(114, 137, 218, 0.1); border-radius: 8px; border: 1px solid #7289da; min-height: 50px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #7289da; }
+        .discord-btn { background: #7289da; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         
-        /* テーブル・入力関連 */
+        .theme-toggle { position: absolute; top: 20px; right: 20px; cursor: pointer; background: var(--nav-bg); color: white; border: none; padding: 8px 12px; border-radius: 20px; }
+
+        .rating-display { text-align: center; font-size: 36px; font-weight: bold; margin: 20px 0; padding: 25px; border-radius: 12px; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); }
+        .bg-none { background: #7f8c8d; }
+        .bg-white { background: #ecf0f1; color: #333 !important; }
+        .bg-blue { background: #3498db; }
+        .bg-green { background: #2ecc71; }
+        .bg-yellow { background: #f1c40f; color: #333 !important; }
+        .bg-red { background: #e74c3c; }
+        .bg-purple { background: #9b59b6; }
+        .bg-copper { background: linear-gradient(135deg, #a86b4c, #b87333, #8a5a3c); }
+        .bg-silver { background: linear-gradient(135deg, #bdc3c7, #ffffff, #7f8c8d); color: #333 !important; }
+        .bg-gold { background: linear-gradient(135deg, #f1c40f, #fff200, #d4af37); color: #333 !important; }
+        .bg-platinum { background: linear-gradient(135deg, #e5e5e5, #ffffff, #b0b0b0); color: #333 !important; }
+        .bg-rainbow { background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff); background-size: 400%; animation: rainbow-bg 5s infinite; }
+        @keyframes rainbow-bg { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
         .nav-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .nav-btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; background: var(--nav-bg); color: white; font-weight: bold; }
         .nav-btn.active { background: var(--header-bg); }
         .screen { display: none; }
         .screen.active { display: block; }
-        
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background: var(--container-bg); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         th { background: var(--header-bg); color: white; padding: 12px; }
-        td { padding: 12px 8px; border-bottom: 1px solid var(--table-border); text-align: center; color: var(--text-color); }
-        .section-title { background: #2c3e50; color: white; padding: 10px; margin: 20px 0 10px; border-radius: 5px; font-size: 1.1em; text-align: center; }
-        
+        td { padding: 12px 8px; border-bottom: 1px solid var(--table-border); text-align: center; }
         input[type="number"] { width: 65px; padding: 6px; border-radius: 4px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color); }
-        .fc-label { color: #e67e22; font-weight: bold; font-size: 0.8em; margin-left: 5px; }
-        .save-btn { background: #27ae60; color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1em; margin-bottom: 20px; font-weight: bold; }
+        .save-btn { background: #27ae60; color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1.1em; font-weight: bold; margin-bottom: 10px; }
+        .fc-label { color: #e67e22; font-weight: bold; font-size: 0.8em; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 Dark Mode</button>
+    
+    <div class="user-profile" id="discord-section">
+        <button class="discord-btn" onclick="loginDiscord()">Login with Discord</button>
+    </div>
+
     <h1>Malody Best 30</h1>
     
     <div class="nav-buttons">
@@ -107,176 +80,156 @@
         <button class="save-btn" onclick="saveAsImage()">📸 画像として保存</button>
         <div id="capture-area" style="background: var(--bg-color); padding: 20px; border-radius: 10px;">
             <div class="rating-display" id="total-rating">Total Rate: 0.00</div>
-            
-            <div class="section-title">Best 30 Songs</div>
+            <div style="font-weight:bold; margin: 10px 0;">Best 30 Songs</div>
             <table><tbody id="best-list"></tbody></table>
-
-            <div class="section-title">Candidates (31st～)</div>
+            <div style="font-weight:bold; margin: 10px 0;">Candidates</div>
             <table><tbody id="sub-list"></tbody></table>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 曲データ ---
+    const CLIENT_ID = '1498278834242588834';
+    const REDIRECT_URI = window.location.href.split('#')[0].split('?')[0]; 
+
+    function loginDiscord() {
+        const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+        window.location.href = url;
+    }
+
+    function checkLogin() {
+        const fragment = new URLSearchParams(window.location.hash.slice(1));
+        const accessToken = fragment.get('access_token');
+        if (accessToken) {
+            fetch('https://discord.com/api/users/@me', { headers: { authorization: `Bearer ${accessToken}` } })
+            .then(res => res.json())
+            .then(user => {
+                const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://discord.com/assets/322c936a8c8be118e9a548f0653b47e2.solid.png';
+                document.getElementById('discord-section').innerHTML = `
+                    <img src="${avatarUrl}" class="user-avatar">
+                    <strong>${user.username}</strong>
+                    <span style="font-size:0.8em; opacity:0.7">さんとしてログイン中</span>
+                `;
+                window.history.replaceState({}, document.title, REDIRECT_URI);
+            });
+        }
+    }
+
     const songData = [
-        { name: "Shining (feat. 藍月なくる)", constant: 22.0 },
-        { name: "World's end BLACKBOX", constant: 47.0 },
+        { name: "Shining (feat. 藍月なくる)", constant: 22.0 }, 
+        { name: "World's end BLACKBOX", constant: 47.0 }, 
         { name: "ソテリア", constant: 19.0 },
-        { name: "LΛ8YRИTH", constant: 42.0 },
-        { name: "AMA", constant: 40.0 },
+        { name: "LΛ8YRИTH", constant: 42.0 }, 
+        { name: "AMA", constant: 40.0 }, 
         { name: "Attractor Dimension", constant: 43.0 },
-        { name: "Onus Regulus", constant: 44.0 },
-        { name: "SELENE-UI", constant: 41.0 },
+        { name: "Onus Regulus", constant: 44.0 }, 
+        { name: "SELENE-UI", constant: 41.0 }, 
         { name: "ARTEMiS", constant: 29.0 },
-        { name: "Redemptione", constant: 37.0 },
-        { name: "第六天魔王", constant: 38.0 },
+        { name: "Redemptione", constant: 37.0 }, 
+        { name: "第六天魔王", constant: 38.0 }, 
         { name: "Deicide feat.古泉葉", constant: 29.0 },
-        { name: "Flechette", constant: 27.0 },
-        { name: "天照らす律動", constant: 28.0 },
+        { name: "Flechette", constant: 27.0 }, 
+        { name: "天照らす律動", constant: 28.0 }, 
         { name: "The King's Return", constant: 45.0 },
-        { name: "The Devil Incarnate", constant: 41.0 },
-        { name: "QiXiN MAdN3ss 2153", constant: 40.0 },
+        { name: "The Devil Incarnate", constant: 41.0 }, 
+        { name: "QiXiN MAdN3ss 2153", constant: 40.0 }, 
         { name: "ZEUS", constant: 41.0 },
-        { name: "∀NØMALY", constant: 40.0 },
-        { name: "raputa", constant: 39.0 },
+        { name: "∀NØMALY", constant: 40.0 }, 
+        { name: "raputa", constant: 39.0 }, 
         { name: "How To Make 音ゲ～曲！", constant: 37.0 },
-        { name: "#1f1e33", constant: 37.0 },
-        { name: "鳳", constant: 41.0 },
+        { name: "#1f1e33", constant: 37.0 }, 
+        { name: "鳳", constant: 41.0 }, 
         { name: "国士無双", constant: 38.0 },
-        { name: "儚姫は原初に舞う", constant: 36.0 },
+        { name: "儚姫は原初に舞う", constant: 36.0 }, 
         { name: "Red to Red", constant: 27.0 },
         { name: "Re : Unknown X", constant: 44.0 },
-        { name: "Apollo", constant: 39.0 },
-        { name: "SuddenИDeath", constant: 40.0 },
+        { name: "Apollo", constant: 39.0 }, 
+        { name: "SuddenИDeath", constant: 40.0 }, 
         { name: "Wolves Standing Towards Enemies", constant: 36.0 },
         { name: "Pendemonium", constant: 37.0 },
         { name: "THE PEERLESS UNDER HEAVEN", constant: 34.0 },
         { name: "魔王", constant: 39.0 },
-        { name: "Spin Eternally", constant: 38.0 },
-        { name: "CUT! into the FUTURE", constant: 38.0 },
+        { name: "Spin Eternally", constant: 38.0 }, 
+        { name: "CUT! into the FUTURE", constant: 38.0 }, 
         { name: "7thSense", constant:31.0},
-        { name: "Dimensional Exploration", constant:38.0},
-        { name: "A.O.E::area_of_effect", constant:38.0},
+        { name: "Dimensional Exploration", constant:38.0}, 
+        { name: "A.O.E::area_of_effect", constant:38.0}, 
         { name: "MAYHEM(DETRUO RE)", constant:40.0},
-        { name: "LUNATiC CiRCUiT", constant:34.0},
-        { name: "R'N'R Monsta", constant:34.0},
+        { name: "LUNATiC CiRCUiT", constant:34.0}, 
+        { name: "R'N'R Monsta", constant:34.0}, 
         { name: "Synthesis.", constant:38.0},
         { name: "NeruNeru-Chan travels to the Luminous Stars!", constant:37.0},
         { name: "燐華", constant:37.0},
         { name: "Last Wish", constant:39.0},
-        { name: "永眠のすゝめ", constant:24.0},
+        { name: "永眠のすゝめ", constant:24.0}, 
         { name: "Re:End of a Dream(Long Ver.)", constant:33.0},
         { name: "ずんずんサファリ(Remix)", constant:25.0},
         { name: "ずんずんサファリ", constant:23.0},
-        { name: "Snooze", constant:27.0},
+        { name: "Snooze", constant:27.0}, 
         { name: "おしゃまなプリンセス", constant:28.0},
-        { name: "Executioner(Master)", constant:34.0},
-        { name: "Executioner(Execution)", constant:50.0},
+        { name: "Executioner(Master)", constant:34.0}, 
+        { name: "Executioner(Execution)", constant:50.0}, 
         { name: "わかれみち", constant:31.0},
-        { name: "激運！七福ハッピークルー", constant:25.0},
-        { name: "Flap&Clap", constant:29.0},
+        { name: "激運！七福ハッピークルー", constant:25.0}, 
+        { name: "Flap&Clap", constant:29.0}, 
         { name: "あの日、あの部屋で、あったこと", constant:32.0},
-        { name: "D/N/A", constant:16.0},
-        { name: "Viyella's Scream", constant:0.0},
+        { name: "D/N/A", constant:16.0}, 
+        { name: "Viyella's Scream", constant:0.0}, 
         { name: "驟雨の狭間", constant:38.0},
-        { name: "Distance", constant:19.0},
-        { name: "Pure Ruby", constant:37.0},
+        { name: "Distance", constant:19.0}, 
+        { name: "Pure Ruby", constant:37.0}, 
         { name: "Pure Ruby", constant:40.0},
-        { name: "Time Leaper", constant:41.0},
-        { name: "One Forgotten Night", constant:36.0},
+        { name: "Time Leaper", constant:41.0}, 
+        { name: "One Forgotten Night", constant:36.0}, 
         { name: "Sevcon", constant:29.0},
-        { name: "Shiawase (VIP)", constant:39.0},
+        { name: "Shiawase (VIP)", constant:39.0}, 
         { name: "Shiawase (VIP)", constant:37.0},
         { name: "Distance", constant:36.0},
-        { name: "Clock Paradox(IN 14.5)", constant:21.0},
+        { name: "Clock Paradox(IN 14.5)", constant:21.0}, 
         { name: "Clock Paradox(AT 15.8(remake))", constant:43.0},
-        { name: "Clock Paradox(AT 15.4)", constant:25.0},
+        { name: "Clock Paradox(AT 15.4)", constant:25.0}, 
         { name: "Ludicrous speed(AF+?)", constant:32.0},
-        { name: "Ludicrous speed(SP?)", constant:63.0},
+        { name: "Ludicrous speed(SP?)", constant:63.0}, 
         { name: "Brilliant Blue", constant:34.0},
-        { name: "平衡世界 -parallel world-(EZ7.4)", constant:9.0},
+        { name: "平衡世界 -parallel world-(EZ7.4)", constant:9.0}, 
         { name: "平衡世界 -parallel world-(IN 15.4)", constant:30.0},
-        { name: "平衡世界 -parallel world-(9K SP?)", constant:61.0},
+        { name: "平衡世界 -parallel world-(9K SP?)", constant:61.0}, 
         { name: "平衡世界 -parallel world-(HD11.8)", constant:21.0},
-        { name: "RetributationI(V-hard)", constant:54.0},
+        { name: "RetributationI(V-hard)", constant:54.0}, 
         { name: "RetributationI(hard)", constant:34.0},
-        { name: "Class Memories(6K SP?)", constant:55.0},
-        { name: "Class Memories(LT19.6)", constant:35.0},
+        { name: "Class Memories(6K SP?)", constant:55.0}, 
+        { name: "Class Memories(LT19.6)", constant:35.0}, 
         { name: "Algebra(SP?)", constant:61.0}
     ];
 
     let savedData = JSON.parse(localStorage.getItem('malody_play_data_v2')) || {};
-    let currentSortKey = 'constant'; 
-    let isAsc = false;
-
-    // --- テーマ切り替え関数 ---
-    function toggleTheme() {
-        const body = document.documentElement;
-        const btn = document.getElementById('theme-btn');
-        if (body.getAttribute('data-theme') === 'dark') {
-            body.removeAttribute('data-theme');
-            btn.innerText = "🌙 Dark Mode";
-            localStorage.setItem('theme', 'light');
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            btn.innerText = "☀️ Light Mode";
-            localStorage.setItem('theme', 'dark');
-        }
-    }
-
-    // 保存されたテーマの読み込み
-    if (localStorage.getItem('theme') === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-btn').innerText = "☀️ Light Mode";
-    }
+    let currentSortKey = 'constant'; let isAsc = false;
 
     function getRankClass(rate) {
-        if (rate >= 43.63) return "bg-rainbow";
-        if (rate >= 39.99) return "bg-platinum";
-        if (rate >= 36.36) return "bg-gold";
-        if (rate >= 32.72) return "bg-silver";
-        if (rate >= 29.08) return "bg-copper";
-        if (rate >= 25.45) return "bg-purple";
-        if (rate >= 21.81) return "bg-red";
-        if (rate >= 18.18) return "bg-yellow";
-        if (rate >= 14.54) return "bg-green";
-        if (rate >= 7.27) return "bg-blue";
-        if (rate >= 3.63) return "bg-white";
-        return "bg-none";
+        if (rate >= 43.63) return "bg-rainbow"; if (rate >= 39.99) return "bg-platinum"; if (rate >= 36.36) return "bg-gold";
+        if (rate >= 32.72) return "bg-silver"; if (rate >= 29.08) return "bg-copper"; if (rate >= 25.45) return "bg-purple";
+        if (rate >= 21.81) return "bg-red"; if (rate >= 18.18) return "bg-yellow"; if (rate >= 14.54) return "bg-green";
+        if (rate >= 7.27) return "bg-blue"; if (rate >= 3.63) return "bg-white"; return "bg-none";
     }
 
     function calculateSingleRate(acc, constant, isFC) {
         if (!acc || acc <= 0) return 0;
         let bonus = 0;
-        if (acc >= 100) bonus = 2.5;
-        else if (acc >= 99.50) bonus = 2.0 + (acc - 99.50);
-        else if (acc >= 99.00) bonus = 1.5 + (acc - 99.00);
-        else if (acc >= 98.50) bonus = 1.3 + (acc - 98.50);
-        else if (acc >= 98.00) bonus = 1.1 + (acc - 98.00);
-        else if (acc >= 97.50) bonus = 0.9 + (acc - 97.50);
-        else if (acc >= 97.00) bonus = 0.7 + (acc - 97.00);
-        else if (acc >= 96.50) bonus = 0.5 + (acc - 96.50);
-        else if (acc >= 96.00) bonus = 0.3 + (acc - 96.00);
-        else if (acc >= 95.50) bonus = 0.1 + (acc - 95.50);
-        else if (acc >= 95.00) bonus = 0;
-        else bonus = -Math.floor((95.00 - acc) / 0.5) * 0.5;
-
-        let finalRate = constant + bonus;
-        if (isFC && acc < 100) finalRate += 0.2;
-        return Math.max(0, finalRate);
+        if (acc >= 100) bonus = 2.5; else if (acc >= 99.5) bonus = 2.0 + (acc - 99.5);
+        else if (acc >= 99.0) bonus = 1.5 + (acc - 99.0); else if (acc >= 98.5) bonus = 1.3 + (acc - 98.5);
+        else if (acc >= 98.0) bonus = 1.1 + (acc - 98.0); else if (acc >= 97.5) bonus = 0.9 + (acc - 97.5);
+        else if (acc >= 97.0) bonus = 0.7 + (acc - 97.0); else if (acc >= 96.5) bonus = 0.5 + (acc - 96.5);
+        else if (acc >= 96.0) bonus = 0.3 + (acc - 96.0); else if (acc >= 95.5) bonus = 0.1 + (acc - 95.5);
+        else if (acc >= 95.0) bonus = 0; else bonus = -Math.floor((95.0 - acc) / 0.5) * 0.5;
+        let finalRate = constant + bonus; if (isFC && acc < 100) finalRate += 0.2; return Math.max(0, finalRate);
     }
 
     function refresh() {
         const inputTbody = document.getElementById('input-list');
-        const bestList = document.getElementById('best-list');
-        const subList = document.getElementById('sub-list');
-
         let all = songData.map((s, i) => {
             const d = savedData[i] || { acc: 0, fc: false };
             return { ...s, ...d, rate: calculateSingleRate(d.acc, s.constant, d.fc), index: i };
         });
-
         inputTbody.innerHTML = '';
         [...all].sort((a,b) => {
             let valA = a[currentSortKey]; let valB = b[currentSortKey];
@@ -285,21 +238,17 @@
         }).forEach(s => {
             inputTbody.innerHTML += `<tr><td style="text-align:left">${s.name}</td><td>${s.constant}</td><td><input type="number" step="0.01" value="${s.acc||''}" onchange="update(${s.index},'acc',this.value)"></td><td><input type="checkbox" ${s.fc?'checked':''} onchange="update(${s.index},'fc',this.checked)"></td></tr>`;
         });
-
         let sortedAll = all.sort((a,b) => b.rate - a.rate);
         let top30 = sortedAll.slice(0, 30);
-        let candidates = sortedAll.slice(30, 45);
-
         const total = (top30.reduce((a,b)=>a+b.rate, 0) / 30).toFixed(2);
         const display = document.getElementById('total-rating');
         display.innerText = `Total Rate: ${total}`;
         display.className = `rating-display ${getRankClass(parseFloat(total))}`;
-
-        const renderTable = (list, target, startIdx) => {
-            target.innerHTML = list.map((s,i) => `<tr><td width="30">${startIdx + i + 1}</td><td style="text-align:left">${s.name}${s.fc?' <span class="fc-label">FC</span>':''}</td><td width="80">${s.acc.toFixed(2)}%</td><td width="60">${s.rate.toFixed(2)}</td></tr>`).join('');
+        const render = (list, target, start) => {
+            document.getElementById(target).innerHTML = list.map((s,i) => `<tr><td width="30">${start+i+1}</td><td style="text-align:left">${s.name}${s.fc?' <span class="fc-label">FC</span>':''}</td><td width="80">${s.acc.toFixed(2)}%</td><td width="60">${s.rate.toFixed(2)}</td></tr>`).join('');
         };
-        renderTable(top30, bestList, 0);
-        renderTable(candidates, subList, 30);
+        render(top30, 'best-list', 0);
+        render(sortedAll.slice(30, 45), 'sub-list', 30);
     }
 
     function update(i, k, v) {
@@ -309,32 +258,32 @@
         refresh();
     }
 
-    function setSort(key) {
-        if (currentSortKey === key) isAsc = !isAsc;
-        else { currentSortKey = key; isAsc = false; }
-        refresh();
-    }
-
-    function showScreen(id, btn) {
-        document.querySelectorAll('.screen, .nav-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-        refresh();
+    function setSort(key) { if (currentSortKey === key) isAsc = !isAsc; else { currentSortKey = key; isAsc = false; } refresh(); }
+    function showScreen(id, btn) { document.querySelectorAll('.screen, .nav-btn').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); refresh(); }
+    function toggleTheme() {
+        const body = document.documentElement;
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        document.getElementById('theme-btn').innerText = isDark ? "🌙 Dark Mode" : "☀️ Light Mode";
     }
 
     function saveAsImage() {
         const area = document.getElementById('capture-area');
-        // 画像保存時は現在の背景色を反映
-        const currentBg = getComputedStyle(document.documentElement).getPropertyValue('--bg-color');
-        html2canvas(area, { scale: 2, backgroundColor: currentBg.trim() }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'malody_best30.png';
-            link.href = canvas.toDataURL();
-            link.click();
+        const currentBg = getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim();
+        html2canvas(area, { scale: 2, backgroundColor: currentBg }).then(canvas => {
+            const link = document.createElement('a'); link.download = 'malody_best30.png'; link.href = canvas.toDataURL(); link.click();
         });
     }
 
-    refresh();
+    window.onload = () => {
+        checkLogin();
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('theme-btn').innerText = "☀️ Light Mode";
+        }
+        refresh();
+    };
 </script>
 </body>
 </html>
