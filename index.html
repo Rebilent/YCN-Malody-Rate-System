@@ -225,10 +225,10 @@
     let currentSortKey = 'constant'; let isAsc = false;
 
     function getRankClass(rate) {
-        if (rate >= 43.63) return "bg-rainbow"; if (rate >= 39.99) return "bg-platinum"; if (rate >= 36.36) return "bg-gold";
-        if (rate >= 32.72) return "bg-silver"; if (rate >= 29.08) return "bg-copper"; if (rate >= 25.45) return "bg-purple";
-        if (rate >= 21.81) return "bg-red"; if (rate >= 18.18) return "bg-yellow"; if (rate >= 14.54) return "bg-green";
-        if (rate >= 7.27) return "bg-blue"; if (rate >= 3.63) return "bg-white"; return "bg-none";
+        if (rate >= 26.00) return "bg-rainbow"; if (rate >= 25.00) return "bg-platinum"; if (rate >= 24.00) return "bg-gold";
+        if (rate >= 22.00) return "bg-silver"; if (rate >= 20.00) return "bg-copper"; if (rate >= 18.00) return "bg-purple";
+        if (rate >= 16.00) return "bg-red"; if (rate >= 14.00) return "bg-yellow"; if (rate >= 11.0) return "bg-green";
+        if (rate >= 0) return "bg-white";
     }
 
     function calculateSingleRate(acc, constant, isFC) {
