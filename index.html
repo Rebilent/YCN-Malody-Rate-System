@@ -234,12 +234,10 @@
     function calculateSingleRate(acc, constant, isFC) {
         if (!acc || acc <= 0) return 0;
         let bonus = 0;
-        if (acc >= 100) bonus = 2.5; else if (acc >= 99.5) bonus = 2.0 + (acc - 99.5);
-        else if (acc >= 99.0) bonus = 1.5 + (acc - 99.0); else if (acc >= 98.5) bonus = 1.3 + (acc - 98.5);
-        else if (acc >= 98.0) bonus = 1.1 + (acc - 98.0); else if (acc >= 97.5) bonus = 0.9 + (acc - 97.5);
-        else if (acc >= 97.0) bonus = 0.7 + (acc - 97.0); else if (acc >= 96.5) bonus = 0.5 + (acc - 96.5);
-        else if (acc >= 96.0) bonus = 0.3 + (acc - 96.0); else if (acc >= 95.5) bonus = 0.1 + (acc - 95.5);
-        else if (acc >= 95.0) bonus = 0; else bonus = -Math.floor((95.0 - acc) / 0.5) * 0.5;
+        if (acc >= 100) bonus = 2.0; else if (acc >= 99.75) bonus = 1.75 + (acc - 99.75);
+        else if (acc >= 99.0) bonus = 1.250 + (acc - 99.0); else if (acc >= 98.0) bonus = 0.750 + (acc - 98.0);
+        else if (acc >= 96.0) bonus = 0.0 + (acc - 96.0); else if (acc >= 89.5) bonus = -4.00 + (acc - 89.5);
+        else if (acc >= 79.0) bonus = -6.0 + (acc - 79.0); else if (acc >= 49.0) bonus = 0
         let finalRate = constant + bonus; if (isFC && acc < 100) finalRate += 0.2; return Math.max(0, finalRate);
     }
 
