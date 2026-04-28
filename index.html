@@ -91,7 +91,7 @@
     </div>
 
     <div id="ranking-screen" class="screen">
-        <button class="save-btn" style="background:#3498db" onclick="sendToRanking()">📊 自分のスコアを送信</button>
+        <button class="save-btn" style="background:#3498db" onclick="sendToRanking()">📊 クラウドに同期＆送信</button>
         <table>
             <thead>
                 <tr>
@@ -108,7 +108,7 @@
 <script>
     const CLIENT_ID = '1498278834242588834';
     const REDIRECT_URI = window.location.href.split('#')[0].split('?')[0];
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzBoygQdgUomo1f1kWJ71-rfVD1WekdSx80UEq1FEHw_12ZS9NLC6Pi4GYu_SM25ESSYg/exec'; 
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxLg3M8Y7v5AjZAJKY-re3qQJr_-DFyQ4Z8rm4vqpnJfUAD66MuSEiKk7vyltX19kABBA/exec'
     
     let currentUser = { name: "Guest", avatar: "" };
 
@@ -132,6 +132,8 @@
                     <span style="font-size:0.8em; opacity:0.7">さんとしてログイン中</span>
                 `;
                 window.history.replaceState({}, document.title, REDIRECT_URI);
+                // ログイン成功時にクラウドからデータをロード
+                loadUserData(user.username);
             });
         }
     }
@@ -172,53 +174,53 @@
         { name: "魔王", constant: 23.0 },
         { name: "Spin Eternally", constant: 24.0 },
         { name: "CUT! into the FUTURE", constant: 25.0 },
-        { name: "7thSense", constant:7.0},
-        { name: "Dimensional Exploration", constant:19.0},
-        { name: "A.O.E::area_of_effect", constant:22.0},
-        { name: "MAYHEM(DETRUO RE)", constant:26.0},
-        { name: "LUNATiC CiRCUiT", constant:16.0},
-        { name: "R'N'R Monsta", constant:19.0},
-        { name: "Synthesis.", constant:20.0},
-        { name: "NeruNeru-Chan travels to the Luminous Stars!", constant:22.0},
-        { name: "燐華", constant:26.0},
-        { name: "Last Wish", constant:31.0},
-        { name: "永眠のすゝめ", constant:7.0},
-        { name: "Re:End of a Dream(Long Ver.)", constant:18.0},
-        { name: "ずんずんサファリ(Remix)", constant:5.0},
-        { name: "ずんずんサファリ", constant:4.0},
-        { name: "Snooze", constant:8.0},
-        { name: "おしゃまなプリンセス", constant:11.0},
-        { name: "Executioner(Master)", constant:20.0},
-        { name: "Executioner(Execution)", constant:28.0},
-        { name: "わかれみち", constant:14.0},
-        { name: "激運！七福ハッピークルー", constant:13.0},
-        { name: "Flap&Clap", constant:14.0},
-        { name: "あの日、あの部屋で、あったこと", constant:16.0},
-        { name: "Breakcore WTF!?", constant:19.0},
-        { name: "D/N/A", constant:5.0},
-        { name: "Viyella's Scream", constant:17.0},
-        { name: "驟雨の狭間(AT 16.9)", constant:19.0},
-        { name: "Distance", constant:2.0},
-        { name: "驟雨の狭間(EZ 8.2)", constant:1.0},
-        { name: "Pure Ruby(LT 19.3)", constant:18.0},
-        { name: "Pure Ruby(LT 18.9)", constant:23.0},
-        { name: "One Forgotten Night", constant:2.0},
-        { name: "Sevcon", constant:4.0},
-        { name: "Shiawase (VIP)", constant:28.0},        
-        { name: "Distance", constant:10.0},
-        { name: "Clock Paradox(IN 14.5)", constant:4.0},
-        { name: "Clock Paradox(AT 15.8(remake))", constant:7.0},
-        { name: "Clock Paradox(AT 15.4)", constant:12.0},
-        { name: "Ludicrous speed(AF+?)", constant:16.0},
-        { name: "Ludicrous speed(SP?)", constant:29.0},
-        { name: "Brilliant Blue", constant:18.0},
-        { name: "平衡世界 -parallel world-(EZ7.4)", constant:1.0},
-        { name: "平衡世界 -parallel world-(IN 15.4)", constant:13.0},
-        { name: "平衡世界 -parallel world-(HD11.8)", constant:2.0},
-        { name: "RetributionI(V-hard)", constant:24.0},
-        { name: "RetributionI(hard)", constant:16.0},
-        { name: "Class Memories(LT19.6)", constant:17.0},
-        { name: "Algebra(SP?)", constant:34.0},
+        { name: "7thSense", constant: 7.0 },
+        { name: "Dimensional Exploration", constant: 19.0 },
+        { name: "A.O.E::area_of_effect", constant: 22.0 },
+        { name: "MAYHEM(DETRUO RE)", constant: 26.0 },
+        { name: "LUNATiC CiRCUiT", constant: 16.0 },
+        { name: "R'N'R Monsta", constant: 19.0 },
+        { name: "Synthesis.", constant: 20.0 },
+        { name: "NeruNeru-Chan travels to the Luminous Stars!", constant: 22.0 },
+        { name: "燐華", constant: 26.0 },
+        { name: "Last Wish", constant: 31.0 },
+        { name: "永眠のすゝめ", constant: 7.0 },
+        { name: "Re:End of a Dream(Long Ver.)", constant: 18.0 },
+        { name: "ずんずんサファリ(Remix)", constant: 5.0 },
+        { name: "ずんずんサファリ", constant: 4.0 },
+        { name: "Snooze", constant: 8.0 },
+        { name: "おしゃまなプリンセス", constant: 11.0 },
+        { name: "Executioner(Master)", constant: 20.0 },
+        { name: "Executioner(Execution)", constant: 28.0 },
+        { name: "わかれみち", constant: 14.0 },
+        { name: "激運！七福ハッピークルー", constant: 13.0 },
+        { name: "Flap&Clap", constant: 14.0 },
+        { name: "あの日、あの部屋で、あったこと", constant: 16.0 },
+        { name: "Breakcore WTF!?", constant: 19.0 },
+        { name: "D/N/A", constant: 5.0 },
+        { name: "Viyella's Scream", constant: 17.0 },
+        { name: "驟雨の狭間(AT 16.9)", constant: 19.0 },
+        { name: "Distance", constant: 2.0 },
+        { name: "驟雨の狭間(EZ 8.2)", constant: 1.0 },
+        { name: "Pure Ruby(LT 19.3)", constant: 18.0 },
+        { name: "Pure Ruby(LT 18.9)", constant: 23.0 },
+        { name: "One Forgotten Night", constant: 2.0 },
+        { name: "Sevcon", constant: 4.0 },
+        { name: "Shiawase (VIP)", constant: 28.0 },
+        { name: "Distance", constant: 10.0 },
+        { name: "Clock Paradox(IN 14.5)", constant: 4.0 },
+        { name: "Clock Paradox(AT 15.8(remake))", constant: 7.0 },
+        { name: "Clock Paradox(AT 15.4)", constant: 12.0 },
+        { name: "Ludicrous speed(AF+?)", constant: 16.0 },
+        { name: "Ludicrous speed(SP?)", constant: 29.0 },
+        { name: "Brilliant Blue", constant: 18.0 },
+        { name: "平衡世界 -parallel world-(EZ7.4)", constant: 1.0 },
+        { name: "平衡世界 -parallel world-(IN 15.4)", constant: 13.0 },
+        { name: "平衡世界 -parallel world-(HD11.8)", constant: 2.0 },
+        { name: "RetributionI(V-hard)", constant: 24.0 },
+        { name: "RetributionI(hard)", constant: 16.0 },
+        { name: "Class Memories(LT19.6)", constant: 17.0 },
+        { name: "Algebra(SP?)", constant: 34.0 }
     ];
 
     let savedData = JSON.parse(localStorage.getItem('malody_play_data_v2')) || {};
@@ -237,7 +239,7 @@
         if (acc >= 100) bonus = 2.0; else if (acc >= 99.75) bonus = 1.75 + (acc - 99.75);
         else if (acc >= 99.0) bonus = 1.250 + (acc - 99.0); else if (acc >= 98.0) bonus = 0.750 + (acc - 98.0);
         else if (acc >= 96.0) bonus = 0.0 + (acc - 96.0); else if (acc >= 89.5) bonus = -4.00 + (acc - 89.5);
-        else if (acc >= 79.0) bonus = -6.0 + (acc - 79.0); else if (acc >= 49.0) bonus = 0
+        else if (acc >= 79.0) bonus = -6.0 + (acc - 79.0); else if (acc >= 49.0) bonus = 0;
         let finalRate = constant + bonus; if (isFC && acc < 100) finalRate += 0.2; return Math.max(0, finalRate);
     }
 
@@ -303,21 +305,44 @@
 
     async function sendToRanking() {
         if (currentUser.name === "Guest") return alert("Discordログインが必要です！");
-        if (GAS_URL === 'YOUR_GAS_WEBAPP_URL_HERE') return alert("GASのURLが設定されていません。");
+        if (GAS_URL.includes('YOUR_GAS')) return alert("GASのURLが正しく設定されていません。");
         const rate = document.getElementById('total-rating').innerText.replace('Total Rate: ', '');
         
+        const payload = { 
+            name: currentUser.name, 
+            rate: rate, 
+            avatar: currentUser.avatar,
+            playData: savedData 
+        };
+
         try {
             await fetch(GAS_URL, {
                 method: "POST",
-                body: JSON.stringify({ name: currentUser.name, rate: rate, avatar: currentUser.avatar })
+                body: JSON.stringify(payload)
             });
-            alert("ランキングに送信しました！");
+            alert("クラウドにデータを同期しました！");
             loadRanking();
         } catch(e) { alert("送信に失敗しました。"); }
     }
 
+    async function loadUserData(name) {
+        try {
+            const res = await fetch(`${GAS_URL}?name=${encodeURIComponent(name)}`);
+            const cloudData = await res.json();
+            
+            if (cloudData && Object.keys(cloudData).length > 0) {
+                if (confirm("クラウドに保存されたプレイデータが見つかりました。この端末に同期（復元）しますか？")) {
+                    savedData = cloudData;
+                    localStorage.setItem('malody_play_data_v2', JSON.stringify(savedData));
+                    refresh();
+                    alert("同期が完了しました！");
+                }
+            }
+        } catch(e) { console.error("Cloud load failed", e); }
+    }
+
     async function loadRanking() {
-        if (GAS_URL === 'YOUR_GAS_WEBAPP_URL_HERE') return;
+        if (GAS_URL.includes('YOUR_GAS')) return;
         try {
             const res = await fetch(GAS_URL);
             const data = await res.json();
